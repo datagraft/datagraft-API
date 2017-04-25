@@ -30,41 +30,6 @@ security:
   - APIKey: []
 
 paths:
-  /users/sign_in:
-    get:
-      description: New user session template
-      produces: 
-        - application/json
-      consumes:
-        - application/json
-      responses:
-        200:
-          description: Success
-    post:
-      description: User login and get session cookie
-      produces: 
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: body
-          schema: 
-            $ref: '#/definitions/User'
-          required: true
-      responses:
-        200:
-          description: Successfully logged in
-  /users/sign_out:
-    delete:
-      description: User logout - end session
-      produces: 
-        - application/json
-      consumes:
-        - application/json
-      responses:
-        200:
-          description: Successfully logged out 
   /api_keys:
     get:
       description: Get all of a user's API keys
@@ -75,6 +40,10 @@ paths:
       responses:
         200:
           description: Success in retrieving API keys
+          schema:
+            $ref: '#/definitions/APIKeyIndexResponse'
+        403:
+          description: Forbidden  
     post:
       description: Create new API key
       produces: 
@@ -85,14 +54,30 @@ paths:
         - in: body
           name: api_key
           schema: 
-            $ref: '#/definitions/APIKey'
+            $ref: '#/definitions/APIKeyPost'
           required: true
           
       security:
         - APIKey: []
       responses:
-        200:
+        201:
           description: Successfully created API key  
+          schema:
+            $ref: '#/definitions/APIKeyShowResponse'
+        403:
+          description: Forbidden  
+  /api_keys/first:
+    get:
+      description: Get the first enabled API key
+      produces: 
+        - text/plain
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving API key
+        403:
+          description: Forbidden  
   /api_keys/{id}:
     get:
       description: Get the attributes of the API key
@@ -103,7 +88,7 @@ paths:
       parameters:
         - in: path
           name: id
-          description: ID of the API key to be deleted
+          description: ID of the API key to be retrieved
           required: true
           type: string
       security:
@@ -111,7 +96,34 @@ paths:
       responses:
         200:
           description: Successfully obtained info about API key
+          schema:
+            $ref: '#/definitions/APIKeyShowResponse'
+        403:
+          description: Forbidden  
     patch:
+      description: Update an API key
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the API key to be updated
+          required: true
+          type: string
+          
+        - in: body
+          name: api_key
+          schema: 
+            $ref: '#/definitions/APIKeyPatch'
+          required: true
+      security:
+        - APIKey: []
+      responses:
+        200:
+          description: Successfully updated API key
+    put:
       description: Update an API key
       produces: 
         - application/json
@@ -151,6 +163,63 @@ paths:
       responses:
         204:
           description: Successfully deleted API key
+  /quotas:
+    get:
+      description: Get information on the current quota of an authenticated user
+      produces: 
+        - application/json
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving quotainformation
+          schema:
+            $ref: '#/definitions/QuotasResponse'
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores:
+    get:
+      description: Get list of all available attached files
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file list
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}:
+    get:
+      description: Get information about a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
     
   /{user}/transformations:
     get:
@@ -2646,16 +2715,6 @@ paths:
         200:
           description: Success in retrieving assets
           
-  /quotas: 
-    get:
-      description: Get information on the current quota of an authenticated user
-      produces:
-        - application/json
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Success in retrieving quota information
       
 definitions:
   User:
@@ -2676,20 +2735,78 @@ definitions:
           remember_me:
             type: string
             description: 1 or 0
-  APIKey:
+  APIKeyIndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        user_id: 
+          type: integer
+        enabled: 
+          type: boolean
+        name: 
+          type: string
+        key: 
+          type: string
+        url: 
+          type: string
+  APIKeyShowResponse:
+    type: object
+    properties:
+      enabled: 
+        type: boolean
+      name: 
+        type: string
+      key: 
+        type: string
+  APIKeyPost:
     required:
-    - enabled
+    - api_key
     properties:
-      name: 
-        type: string
-      enabled:
-        type: boolean
+      api_key: 
+        type: object
+        required:
+        - enabled
+        properties:
+          name: 
+            type: string
+          enabled:
+            type: boolean
   APIKeyPatch:
+    required:
+    - api_key
     properties:
-      name: 
-        type: string
-      enabled:
-        type: boolean
+      api_key: 
+        type: object
+        properties:
+          name: 
+            type: string
+          enabled:
+            type: boolean
+  QuotasResponse:
+    type: object
+    properties:
+      current_sparql_endpoints: 
+        type: integer
+      max_num_sparql_endpoints: 
+        type: integer
+      current_sparql_triples: 
+        type: integer
+      max_sparql_triples: 
+        type: integer
+      current_files: 
+        type: integer
+      max_num_files: 
+        type: integer
+      current_files_size: 
+        type: integer
+      max_files_size: 
+        type: integer
+      current_num_data_transformations: 
+        type: integer
+      max_num_data_transformations: 
+        type: integer
   Transformation:
     properties:
       name: 
