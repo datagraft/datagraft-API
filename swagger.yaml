@@ -194,6 +194,8 @@ paths:
       responses:
         200:
           description: Success in retrieving file list
+          schema:
+            $ref: '#/definitions/FilestoreIndexResponse'
         403:
           description: Forbidden  
     
@@ -218,6 +220,140 @@ paths:
       responses:
         200:
           description: Success in retrieving file information
+          schema:
+            $ref: '#/definitions/FilestoreShowResponse'
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}/metadata:
+    get:
+      description: Get list of all metadata for a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}/metadata/{key}:
+    get:
+      description: Get metadata entry for a specific attached file
+      produces: 
+        - text/plain
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+        - name: key
+          required: true
+          description: ID of the metadata entry
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}/configuration:
+    get:
+      description: Get list of all configuration for a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}/configuration/{key}:
+    get:
+      description: Get configuration entry for a specific attached file
+      produces: 
+        - text/plain
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+        - name: key
+          required: true
+          description: ID of the metadata entry
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores/{id}/attachment:
+    get:
+      description: Download attached file
+      produces: 
+        - text/csv
+        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        - application/vnd.ms-excel
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Success in retrieving file
         403:
           description: Forbidden  
     
@@ -2807,6 +2943,79 @@ definitions:
         type: integer
       max_num_data_transformations: 
         type: integer
+  FilestoreIndexResponse:
+    type: object
+    properties:
+      "@id": 
+        type: string
+        description: URL used to fetch this response
+      "@type": 
+        type: string
+        description: RDF object type
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      dcat:record:
+        type: array
+        items:
+          properties:
+            id:
+              type: string
+              description: Asset id
+            type:
+              type: string
+              description: Asset type
+            dct:title:
+              type: string
+              description: Asset title
+            foaf:primaryTopic:
+              type: string
+              description: URL for this asset
+            "@type": 
+              type: string
+              description: RDF object type
+            dcat:public:
+              type: boolean
+              description: Public / private visibility
+            foaf:publisher:
+              type: string
+              description: Asset username
+            dct:modified:
+              type: string
+              description: Date last modified
+            dct:issued:
+              type: string
+              description: Data issued
+  FilestoreShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      dct:title:
+        type: string
+        description: Asset title
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:accessURL:
+        type: string
+        description: URL used to fetch this response
+      dcat:mediaType: 
+        type: string
+      dcat:byteSize: 
+        type: integer
+      sin:extension:
+        type: string
   Transformation:
     properties:
       name: 
