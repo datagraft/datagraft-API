@@ -32,7 +32,7 @@ security:
 paths:
   /api_keys:
     get:
-      description: Get all of a user's API keys
+      description: Get all API keys for the current user
       produces: 
         - application/json
       security: 
@@ -68,7 +68,7 @@ paths:
           description: Forbidden  
   /api_keys/first:
     get:
-      description: Get the first enabled API key
+      description: Get the first enabled API key for the current user
       produces: 
         - text/plain
       security: 
@@ -80,7 +80,7 @@ paths:
           description: Forbidden  
   /api_keys/{id}:
     get:
-      description: Get the attributes of the API key
+      description: Get the attributes of a specific API key for the current user
       produces: 
         - application/json
       consumes:
@@ -165,7 +165,7 @@ paths:
           description: Successfully deleted API key
   /quotas:
     get:
-      description: Get information on the current quota of an authenticated user
+      description: Get information on the current quota for the current user
       produces: 
         - application/json
       security: 
@@ -180,7 +180,7 @@ paths:
     
   /{user}/filestores:
     get:
-      description: Get list of all available attached files
+      description: Obtain a list of all public attached files for a user. If provided with an enabled API key for that user, returns also the private attaced files.
       produces: 
         - application/json
       parameters:
@@ -307,6 +307,7 @@ paths:
       description: Get configuration entry for a specific attached file
       produces: 
         - text/plain
+        - application/json
       parameters:
         - name: user
           required: true
@@ -426,6 +427,7 @@ paths:
       description: Retrieve meta data according to the given key for the chosen transformation
       produces: 
         - text/plain
+        - application/json
       parameters:
         - name: user
           in: path
@@ -475,6 +477,7 @@ paths:
       description: Retrieve configuration according to the given key for the chosen transformation
       produces: 
         - text/plain
+        - application/json
       parameters:
         - name: user
           in: path
@@ -529,13 +532,15 @@ paths:
         - name: query
           in: body
           schema: 
-            $ref: '#/definitions/Query'
+            $ref: '#/definitions/QueryPost'
           required: true
       security: 
         - APIKey: []
       responses:
         201:
           description: Successfully created a query
+        403:
+          description: Forbidden
           
   /{user}/queries/{id}:
     get:
@@ -561,6 +566,8 @@ paths:
           description: Successfully obtained query
           schema:
             $ref: '#/definitions/QueryShowResponse'
+        404:
+          description: Not found
     put:
       description: TO BE IMPLEMENTED - USE PATCH! Update a query (replace the currently stored one with the one provided in the call)
       produces: 
@@ -581,7 +588,7 @@ paths:
         - name: query
           in: body
           schema: 
-            $ref: '#/definitions/Query'
+            $ref: '#/definitions/QueryPost'
           required: true
       security: 
         - APIKey: []
@@ -605,10 +612,10 @@ paths:
           required: true
           type: string
       
-        - name: query
-          in: body
+        - in: body
+          name: query
           schema: 
-            $ref: '#/definitions/Query'
+            $ref: '#/definitions/QueryPatch'
           required: true
       security: 
         - APIKey: []
@@ -659,12 +666,11 @@ paths:
         200:
           description: Successfully retrieved the meta data for the query
     post:
-      description: NOT WORKING! Create meta data for the chosen query
+      description: Create new meta data for the chosen query
       produces:
         - application/json
       consumes:
         - application/json
-        - text/plain
       parameters:
         - name: user
           in: path
@@ -687,12 +693,11 @@ paths:
         200:
           description: Successfully created the meta data
     put:
-      description: NOT WORKING! Update meta data for the chosen query
+      description: Create new meta data for the chosen query
       produces:
         - application/json
       consumes:
         - application/json
-        - text/plain
       parameters:
         - name: user
           in: path
@@ -715,7 +720,7 @@ paths:
         200:
           description: Successfully updated the meta data   
     delete:
-      description: NOT WORKING! Delete meta data for the chosen query
+      description: Delete all meta data for the chosen query
       produces:
         - application/json
       parameters:
@@ -763,9 +768,10 @@ paths:
         200:
           description: Successfully retrieved the meta data for the query
     post:
-      description: NOT WORKING! Create a meta data field for the chosen query
+      description: Create a meta data field for the chosen query
       produces:
         - application/json
+        - text/plain
       consumes:
         - application/json
         - text/plain
@@ -796,9 +802,10 @@ paths:
         200:
           description: Successfully created the meta data
     put: 
-      description: NOT WORKING! Update a meta data field for the chosen query
+      description: Update a meta data field for the chosen query
       produces:
         - application/json
+        - text/plain
       consumes:
         - application/json
         - text/plain
@@ -829,7 +836,7 @@ paths:
         200:
           description: Successfully updated the meta data field
     delete:
-      description: NOT WORKING! Delete a metadata field for the chosen query
+      description: Delete a metadata field for the chosen query
       produces:
         - application/json
       parameters:
@@ -876,12 +883,11 @@ paths:
         200:
           description: Successfully retrieved the configuration for the query
     post:
-      description: NOT WORKING! Create configuration for the chosen query
+      description: Create new configuration for the chosen query
       produces:
         - application/json
       consumes:
         - application/json
-        - text/plain
       parameters:
         - name: user
           in: path
@@ -904,12 +910,11 @@ paths:
         200:
           description: Successfully created the configuration
     put:
-      description: NOT WORKING! Update configuration for the chosen query
+      description: Update new configuration for the chosen query
       produces:
         - application/json
       consumes:
         - application/json
-        - text/plain
       parameters:
         - name: user
           in: path
@@ -932,7 +937,7 @@ paths:
         200:
           description: Successfully updated the configuration   
     delete:
-      description: NOT WORKING! Delete configuration for the chosen query
+      description: Delete configuration for the chosen query
       produces:
         - application/json
       parameters:
@@ -956,6 +961,7 @@ paths:
     get:
       description: Retrieve configuration according to the given key for the chosen query
       produces: 
+        - application/json
         - text/plain
       parameters:
         - name: user
@@ -979,9 +985,10 @@ paths:
         200:
           description: Successfully retrieved the configuration for the query
     post:
-      description: NOT WORKING! Create a configuration field for the chosen query
+      description: Create a configuration field for the chosen query
       produces:
         - application/json
+        - text/plain
       consumes:
         - application/json
         - text/plain
@@ -1012,9 +1019,10 @@ paths:
         200:
           description: Successfully created the configuration
     put: 
-      description: NOT WORKING! Update a configuration field for the chosen query
+      description: Update a configuration field for the chosen query
       produces:
         - application/json
+        - text/plain
       consumes:
         - application/json
         - text/plain
@@ -1045,7 +1053,7 @@ paths:
         200:
           description: Successfully updated the configuration field
     delete:
-      description: NOT WORKING! Delete a configuration field for the chosen query
+      description: Delete a configuration field for the chosen query
       produces:
         - application/json
       parameters:
@@ -1248,71 +1256,6 @@ paths:
         200:
           description: Successfully retrieved the queriable data
   
-  /{user}/queriable_data_stores/{id}/star:
-    post:
-      description: Star the selected queriable data
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to star the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to be stared
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully gave the queriable data a star
-          
-  /{user}/queriable_data_stores/{id}/unstar:
-    post:
-      description: Unstar the selected queriable data
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to unstar the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to be unstared
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully unstared the queriable data
-
-  /{user}/queriable_data_stores/{id}/versions:
-    get:
-      description: INVALID! Is this implemented?? (Retrieve versions of the queriable data)
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to retrieve
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Information about the versions of the queried queriable data
           
   /{user}/queriable_data_stores/{id}/metadata:
     get:
@@ -1876,50 +1819,6 @@ paths:
         200:
           description: Successfully updated the utility function
   
-  /{user}/utility_functions/{id}/star:
-    post:
-      description: Star the selected utility function
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to star the utility function
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the utility function to be stared
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully gave the utility function a star
-  
-  /{user}/utility_functions/{id}/unstar:
-    post:
-      description: Unstar the selected utility function
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to unstar the utility function
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slut) of the utility function to be unstared
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully unstared the utility function
-
   /{user}/utility_functions/{id}/metadata:
     get:
       description: Retrieve meta data for the chosen utility function
@@ -2524,7 +2423,7 @@ definitions:
         description: Data issued
       dcat:accessURL:
         type: string
-        description: URL used to fetch this response
+        description: URL used to fetch the attached file
       dcat:mediaType: 
         type: string
       dcat:byteSize: 
@@ -2595,6 +2494,45 @@ definitions:
         description: Data issued
       dcat:keyword:
         type: array
+
+  QueryPost:
+    required:
+    - query
+    properties:
+      query: 
+        type: object
+        required:
+        - name
+        - type
+        - query
+        properties:
+          public:
+            type: boolean
+          name:
+            type: string
+          query:
+            type: string
+          language:
+            type: string
+          description:
+            type: string
+          sparql_endpoint_ids:
+            type: array
+  QueryPatch:
+    properties:
+      public:
+        type: boolean
+      name:
+        type: string
+      query:
+        type: string
+      language:
+        type: string
+      description:
+        type: string
+      sparql_endpoint_ids:
+        type: array
+
 
 
   Transformation:
