@@ -1079,297 +1079,86 @@ paths:
           description: Successfully deleted the configuration field
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
-  /{user}/queriable_data_stores:
+  /{user}/sparql_endpoints:
     get:
-      description: Obtain a list of all public queriable data for a user. If provided with an enabled API key for that user, returns also the private queriable data.
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user for whom to obtain the queriable data
-          in: path
-          type: string
-      security:
-        - APIKey: []
-      responses:
-          200:
-            description: Successfully retrieved the list of queriable data.
-            
-    post:
-      description: Create a new queriable data to be stored
+      description: Obtain a list of all public sparql_endpoints for a user. If provided with an enabled API key for that user, returns also the private sparql_endpoints.
       produces: 
         - application/json
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the quireable data
+          description: ID of the user for whom to obtain the list
           in: path
-          type: string
-        - name: queriable_data_store
-          in: body
-          schema:
-            $ref: '#/definitions/QueriableData'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully created the queriable data
-          
-  /{user}/queriable_data_stores/{id}:
-    get:
-      description: Obtain the attributes of the given queriable data
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to retrieve
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully obtained queriable data
-    delete:
-      description: Delete a queriable data
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user who wants to delete the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data to delete
           type: string
       security: 
         - APIKey: []
       responses:
-        204:
-          description: Successfully deleted the queriable data
-    put:
-      description: Update a queriable data (replace the currently stored one with the one provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to retrieve
-          type: string
-        - name: queriable_data_store
-          in: body
-          schema:
-            $ref: '#/definitions/QueriableData'
-          required: true
-      security:
-        - APIKey: []
-      responses:  
         200:
-          description: Successfully updated the queriable data
-    patch:
-      description: Update a queriable data (only change the properties provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the queriable data
-          type: string
-        - name: id
-          in: path
-          required: true 
-          description: ID (slug) of the queriable data to retrieve
-          type: string
-        - name: queriable_data_store
-          in: body
+          description: Successfully retrieved list of transformations
           schema:
-            $ref: '#/definitions/QueriableData'
-          required: true
-      security:
-        - APIKey: []
-      responses:  
-        200:
-          description: Successfully updated the queriable data
-  
-  /{user}/queriable_data_stores/{id}/edit:
+            $ref: '#/definitions/ThingIndexResponse'
+  /{user}/sparql_endpoints/{id}:
     get:
-      description: NOT IMPLEMENTED?? Doesn't work... (Retrieve the code for the queriable data for edit)
-      produces:
+      description: Obtain the attributes of a sparql_endpoints
+      produces: 
+        - application/json
+      parameters:
+      - in: path
+        name: user
+        description: User that the sparql_endpoints belongs to
+        required: true
+        type: string
+      
+      - in: path
+        name: id
+        description: ID (slug) of the sparql_endpoints to retrieve
+        required: true
+        type: string
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Successfully obtained sparql_endpoints
+          schema:
+            $ref: '#/definitions/SparqlendpointShowResponse'
+  /{user}/sparql_endpoints/{id}/metadata:
+    get:
+      description: Retrieve meta data for the chosen sparql_endpoints
+      produces: 
         - application/json
       parameters:
         - name: user
           in: path
           required: true
-          description: ID of the user for who to edit the queriable data
+          description: ID of the user for who to obtain the meta data for the sparql_endpoints
           type: string
         - name: id
           in: path
-          required: true 
-          description: ID (slug) of the queriable data to be edited
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to retrieve the meta data
           type: string
       security:
         - APIKey: []
       responses:
         200:
-          description: Successfully retrieved the queriable data
-  
-          
-  /{user}/queriable_data_stores/{id}/metadata:
+          description: Successfully retrieved the meta data for the sparql_endpoints
+
+  /{user}/sparql_endpoints/{id}/metadata/{key}:
     get:
-      description: Retrieve meta data for the chosen queriable data store
+      description: Retrieve meta data according to the given key for the chosen sparql_endpoints
       produces: 
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to retrieve the meta data
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully retrieved the meta data for the queriable data store
-    post:
-      description: Create meta data for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
         - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to create the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to create the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully created the meta data
-    put:
-      description: Update meta data for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to update the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully updated the meta data   
-    delete:
-      description: Delete meta data for the chosen queriable data store
-      produces:
         - application/json
       parameters:
         - name: user
           in: path
           required: true
-          description: ID of the user for who to delete the meta data for the queriable data store
+          description: ID of the user for who to obtain the meta data for the sparql_endpoints
           type: string
         - name: id
           in: path
           required: true
-          description: ID (slug) of the queriable data store for which to delete the meta data
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully deleted the meta datav for the queriable data store
-  
-  /{user}/queriable_data_stores/{id}/metadata/{key}:
-    get:
-      description: Retrieve meta data according to the given key for the chosen queriable data store
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to obtain the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to retrieve the meta data
+          description: ID (slug) of the sparql_endpoints for which to retrieve the meta data
           type: string
         - name: key
           in: path
@@ -1380,212 +1169,46 @@ paths:
         - APIKey: []
       responses:
         200:
-          description: Successfully retrieved the meta data for the queriable data store
-    post:
-      description: Create a meta data field for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to create the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to create the meta data
-          type: string
-        - name: key
-          in: path
-          required: true
-          description: Key of the metadata to create
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully created the meta data
-    put: 
-      description: Update a meta data field for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to update the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to update
-          required: true
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully updated the meta data field
-    delete:
-      description: Delete a metadata field for the chosen queriable data store
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to delete the meta data for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to delete the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to delete
-          required: true
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully deleted the meta data field
-  
-  /{user}/queriable_data_stores/{id}/configuration:
+          description: Successfully retrieved the meta data for the sparql_endpoints
+
+  /{user}/sparql_endpoints/{id}/configuration:
     get:
-      description: Retrieve configuration for the chosen queriable data store
+      description: Retrieve configuration for the chosen sparql_endpoints
       produces: 
         - application/json
       parameters:
         - name: user
           in: path
           required: true
-          description: ID of the user for who to obtain the configuration for the queriable data store
+          description: ID of the user for who to obtain the configuration for the sparql_endpoints
           type: string
         - name: id
           in: path
           required: true
-          description: ID (slug) of the queriable data store for which to retrieve the configuration
+          description: ID (slug) of the sparql_endpoints for which to retrieve the configuration
           type: string
       security:
         - APIKey: []
       responses:
         200:
-          description: Successfully retrieved the configuration for the queriable data store
-    post:
-      description: Create configuration for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to create the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to create the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully created the configuration
-    put:
-      description: Update configuration for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to update the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully updated the configuration   
-    delete:
-      description: Delete configuration for the chosen queriable data store
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to delete the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to delete the configuration
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully deleted the configuration for the queriable data store
+          description: Successfully retrieved the configuration for the sparql_endpoints
   
-  /{user}/queriable_data_stores/{id}/configuration/{key}:
+  /{user}/sparql_endpoints/{id}/configuration/{key}:
     get:
-      description: Retrieve configuration according to the given key for the chosen queriable data store
+      description: Retrieve configuration according to the given key for the chosen sparql_endpoints
       produces: 
+        - text/plain
         - application/json
       parameters:
         - name: user
           in: path
           required: true
-          description: ID of the user for who to obtain the configuration for the queriable data store
+          description: ID of the user for who to obtain the configuration for the sparql_endpoints
           type: string
         - name: id
           in: path
           required: true
-          description: ID (slug) of the queriable data store for which to retrieve the configuration
+          description: ID (slug) of the sparql_endpoints for which to retrieve the configuration
           type: string
         - name: key
           in: path
@@ -1596,98 +1219,32 @@ paths:
         - APIKey: []
       responses:
         200:
-          description: Successfully retrieved the configuration for the queriable data store
-    post:
-      description: Create a configuration field for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to create the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to create the configuration
-          type: string
-        - name: key
-          in: path
-          required: true
-          description: Key of the configuration to create
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully created the configuration
-    put: 
-      description: Update a configuration field for the chosen queriable data store
-      produces:
-        - application/json
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to update the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to update
-          required: true
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully updated the configuration field
-    delete:
-      description: Delete a configuration field for the chosen queriable data store
-      produces:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to delete the configuration for the queriable data store
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the queriable data store for which to delete the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to delete
-          required: true
-          type: string
-      security:
-        - APIKey: []
-      responses:
-        200:
-          description: Successfully deleted the configuration field
+          description: Successfully retrieved the configuration for the sparql_endpoints
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
      
     
   /{user}/utility_functions:
@@ -2531,6 +2088,38 @@ definitions:
       description:
         type: string
       sparql_endpoint_ids:
+        type: array
+
+  SparqlendpointShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      foaf:publisher:
+        type: string
+        description: Asset username
+      dcat:public:
+        type: boolean
+        description: Public / private visibility
+      dct:title:
+        type: string
+        description: Asset title
+      dct:description: 
+        type: string
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:keyword:
         type: array
 
 
