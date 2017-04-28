@@ -548,17 +548,17 @@ paths:
       produces: 
         - application/json
       parameters:
-      - in: path
-        name: user
-        description: User that the query belongs to
-        required: true
-        type: string
-      
-      - in: path
-        name: id
-        description: ID (slug) of the query to retrieve
-        required: true
-        type: string
+        - in: path
+          name: user
+          description: User that the query belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the query to retrieve
+          required: true
+          type: string
       security: 
         - APIKey: []
       responses:
@@ -627,23 +627,54 @@ paths:
       produces: 
         - application/json
       parameters:
-      - in: path
-        name: user
-        description: User that the query belongs to
-        required: true
-        type: string
-      
-      - in: path
-        name: id
-        description: ID (slug) of the query to delete
-        required: true
-        type: string
+        - in: path
+          name: user
+          description: User that the query belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the query to delete
+          required: true
+          type: string
       security: 
         - APIKey: []
       responses:
         204:
           description: Successfully deleted query
                     
+  /{user}/queries/{id}/execute_query:
+    post:
+      description: Execute a sparql query based on a Query and a sparql_endpoint.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the sparql_endpoint
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID (slug) of the query to delete
+          required: true
+          type: string
+
+        - name: execute_query
+          in: body
+          schema: 
+            $ref: '#/definitions/QueryExecutePost'
+          required: true
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Successfully search
+        403:
+          description: Forbidden
+    
   /{user}/queries/{id}/metadata:
     get:
       description: Retrieve meta data for the chosen query
@@ -1121,6 +1152,36 @@ paths:
           description: Successfully obtained sparql_endpoints
           schema:
             $ref: '#/definitions/SparqlendpointShowResponse'
+
+  /{user}/sparql_endpoints/{id}/execute_query:
+    post:
+      description: Execute a SPARQL query seach on a sparql_endpoint.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the sparql_endpoint
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the sparql_endpoint
+          in: path
+          type: string
+        - name: execute_query
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointExecutequeryPost'
+          required: true
+      security: 
+        - APIKey: []
+      responses:
+        200:
+          description: Successfully search
+        403:
+          description: Forbidden
+    
   /{user}/sparql_endpoints/{id}/metadata:
     get:
       description: Retrieve meta data for the chosen sparql_endpoints
@@ -2051,6 +2112,8 @@ definitions:
         description: Data issued
       dcat:keyword:
         type: array
+      sparql_endpoint_ids:
+        type: array
 
   QueryPost:
     required:
@@ -2090,6 +2153,18 @@ definitions:
       sparql_endpoint_ids:
         type: array
 
+  QueryExecutePost:
+    required:
+    - execute_query
+    properties:
+      execute_query: 
+        type: object
+        required:
+        - sparql_endpoints
+        properties:
+          sparql_endpoints:
+            type: integer
+
   SparqlendpointShowResponse:
     type: object
     properties:
@@ -2122,6 +2197,17 @@ definitions:
       dcat:keyword:
         type: array
 
+  SparqlendpointExecutequeryPost:
+    required:
+    - execute_query
+    properties:
+      execute_query: 
+        type: object
+        required:
+        - query
+        properties:
+          query:
+            type: string
 
 
   Transformation:
