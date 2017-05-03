@@ -9,25 +9,15 @@ schemes:
   - http
   - https
 securityDefinitions:
-  GitHub access code:
+  OAUTH2Security:
     type: oauth2
     scopes:
-      user: 'Grants read/write access to profile info only. Note that this scope includes user:email and user:follow.'
-      'user:email': Grants read access to a user’s email addresses.
-      'user:follow': Grants access to follow or unfollow other users.
-    flow: accessCode
-    authorizationUrl: 'https://github.com/login/oauth/authorize'
-    tokenUrl: 'https://github.com/login/oauth/access_token'
-  APIKey:
-    type: apiKey
-    in: header
-    name: X-user-token
+      public: 'Grants read/write access to profile info only. Note that this scope includes user:email and user:follow.'
+    flow: password
+    tokenUrl: 'http://127.0.0.1:3003/oauth/token'
 security:
-  - GitHub access code:
-      - user
-      - 'user:email'
-      - 'user:follow'
-  - APIKey: []
+  - OAUTH2Security:
+      - public
 
 paths:
   /api_keys:
@@ -35,8 +25,6 @@ paths:
       description: Get all API keys for the current user
       produces: 
         - application/json
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving API keys
@@ -56,9 +44,6 @@ paths:
           schema: 
             $ref: '#/definitions/APIKeyPost'
           required: true
-          
-      security:
-        - APIKey: []
       responses:
         201:
           description: Successfully created API key  
@@ -71,8 +56,6 @@ paths:
       description: Get the first enabled API key for the current user
       produces: 
         - text/plain
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving API key
@@ -91,8 +74,6 @@ paths:
           description: ID of the API key to be retrieved
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully obtained info about API key
@@ -118,8 +99,6 @@ paths:
           schema: 
             $ref: '#/definitions/APIKeyPatch'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated API key
@@ -141,8 +120,6 @@ paths:
           schema: 
             $ref: '#/definitions/APIKeyPatch'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated API key
@@ -158,8 +135,6 @@ paths:
           description: ID of the API key to be deleted
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         204:
           description: Successfully deleted API key
@@ -169,8 +144,6 @@ paths:
       description: Get information on the current quota for the current user
       produces: 
         - application/json
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving quotainformation
@@ -190,8 +163,6 @@ paths:
           description: ID of the user for whom to obtain the list
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file list
@@ -216,8 +187,6 @@ paths:
           description: ID of the file
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file information
@@ -242,8 +211,6 @@ paths:
           description: ID of the file
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file information
@@ -272,8 +239,6 @@ paths:
           description: ID of the metadata entry
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file information
@@ -296,8 +261,6 @@ paths:
           description: ID of the file
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file information
@@ -326,8 +289,6 @@ paths:
           description: ID of the metadata entry
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file information
@@ -352,8 +313,6 @@ paths:
           description: ID of the file
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Success in retrieving file
@@ -371,8 +330,6 @@ paths:
           description: ID of the user for whom to obtain the list
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved list of transformations
@@ -396,8 +353,6 @@ paths:
         description: ID (slug) of the transformation to retrieve
         required: true
         type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully obtained transformation
@@ -420,8 +375,6 @@ paths:
           required: true
           description: ID (slug) of the transformation for which to retrieve the meta data
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the transformation
@@ -448,8 +401,6 @@ paths:
           description: The key of the meta data field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the transformation
@@ -470,8 +421,6 @@ paths:
           required: true
           description: ID (slug) of the transformation for which to retrieve the configuration
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the transformation
@@ -498,8 +447,6 @@ paths:
           description: The key of the configuration field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the transformation
@@ -515,8 +462,6 @@ paths:
           description: ID of the user for whom to obtain the list
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved list of queries
@@ -538,8 +483,6 @@ paths:
           schema: 
             $ref: '#/definitions/QueryPost'
           required: true
-      security: 
-        - APIKey: []
       responses:
         201:
           description: Successfully created a query
@@ -563,8 +506,6 @@ paths:
           description: ID (slug) of the query to retrieve
           required: true
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully obtained query
@@ -595,8 +536,6 @@ paths:
           schema: 
             $ref: '#/definitions/QueryPost'
           required: true
-      security: 
-        - APIKey: []
       responses:
         200:
           description: OK
@@ -623,8 +562,6 @@ paths:
           schema: 
             $ref: '#/definitions/QueryPatch'
           required: true
-      security: 
-        - APIKey: []
       responses:
         200:
           description: OK
@@ -645,8 +582,6 @@ paths:
           description: ID (slug) of the query to delete
           required: true
           type: string
-      security: 
-        - APIKey: []
       responses:
         204:
           description: Successfully deleted query
@@ -674,8 +609,6 @@ paths:
           schema: 
             $ref: '#/definitions/QueryExecutePost'
           required: true
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully search
@@ -698,8 +631,6 @@ paths:
           required: true
           description: ID (slug) of the query for which to retrieve the meta data
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the query
@@ -726,8 +657,6 @@ paths:
           schema:
             $ref: '#/definitions/MetaData'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully created the meta data
@@ -754,8 +683,6 @@ paths:
           schema:
             $ref: '#/definitions/MetaData'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated the meta data   
@@ -775,8 +702,6 @@ paths:
           required: true
           description: ID (slug) of the query for which to delete the meta data
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully deleted the meta data for the query
@@ -803,8 +728,6 @@ paths:
           description: The key of the meta data field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the query
@@ -838,8 +761,6 @@ paths:
           schema:
             $ref: '#/definitions/MetaData'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully created the meta data
@@ -873,8 +794,6 @@ paths:
           schema:
             $ref: '#/definitions/MetaData'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated the meta data field
@@ -899,8 +818,6 @@ paths:
           description: The key of the meta data field to delete
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully deleted the meta data field
@@ -921,8 +838,6 @@ paths:
           required: true
           description: ID (slug) of the query for which to retrieve the configuration
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the query
@@ -949,8 +864,6 @@ paths:
           schema:
             $ref: '#/definitions/Configuration'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully created the configuration
@@ -977,8 +890,6 @@ paths:
           schema:
             $ref: '#/definitions/Configuration'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated the configuration   
@@ -998,8 +909,6 @@ paths:
           required: true
           description: ID (slug) of the query for which to delete the configuration
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully deleted the configuration for the query
@@ -1026,8 +935,6 @@ paths:
           description: The key of the configuration field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the query
@@ -1061,8 +968,6 @@ paths:
           schema:
             $ref: '#/definitions/Configuration'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully created the configuration
@@ -1096,8 +1001,6 @@ paths:
           schema:
             $ref: '#/definitions/Configuration'
           required: true
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully updated the configuration field
@@ -1122,8 +1025,6 @@ paths:
           description: The key of the configuration field to delete
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully deleted the configuration field
@@ -1139,8 +1040,6 @@ paths:
           description: ID of the user for whom to obtain the list
           in: path
           type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved list of sparql_endpoints
@@ -1164,8 +1063,6 @@ paths:
         description: ID (slug) of the sparql_endpoints to retrieve
         required: true
         type: string
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully obtained sparql_endpoints
@@ -1193,8 +1090,6 @@ paths:
           schema: 
             $ref: '#/definitions/SparqlendpointExecutequeryPost'
           required: true
-      security: 
-        - APIKey: []
       responses:
         200:
           description: Successfully search
@@ -1217,8 +1112,6 @@ paths:
           required: true
           description: ID (slug) of the sparql_endpoints for which to retrieve the meta data
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the sparql_endpoints
@@ -1245,8 +1138,6 @@ paths:
           description: The key of the meta data field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the meta data for the sparql_endpoints
@@ -1267,8 +1158,6 @@ paths:
           required: true
           description: ID (slug) of the sparql_endpoints for which to retrieve the configuration
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the sparql_endpoints
@@ -1295,8 +1184,6 @@ paths:
           description: The key of the configuration field to obtain
           required: true
           type: string
-      security:
-        - APIKey: []
       responses:
         200:
           description: Successfully retrieved the configuration for the sparql_endpoints
