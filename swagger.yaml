@@ -152,6 +152,63 @@ paths:
         403:
           description: Forbidden  
     
+  /{user}/upwizards/new/{task}:
+    get:
+      description: Obtain a new wizard for uploading and transform data.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user to own the wizard
+          in: path
+          type: string
+        - name: task
+          required: true
+          description: New wizard for creating a filestore or sparql_endpoint
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in creating a wizard
+          schema:
+            $ref: '#/definitions/WizardShowResponse'
+        403:
+          description: Forbidden  
+        422:
+          description: Failed creating a wizard
+          schema:
+            $ref: '#/definitions/WizardErrorResponse'
+    
+  /{user}/upwizards/{wiz_id}:
+    get:
+      description: Obtain a new wizard for uploading and transform data.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user to own the wizard
+          in: path
+          type: string
+        - name: wiz_id
+          required: true
+          description: Id number for the wizard (returned when chreating new wizard)
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in reading a wizard
+          schema:
+            $ref: '#/definitions/WizardShowResponse'
+        403:
+          description: Forbidden  
+        422:
+          description: Failed creating a wizard
+          schema:
+            $ref: '#/definitions/WizardErrorResponse'
+          
+    
   /{user}/filestores:
     get:
       description: Obtain a list of all public attached files for a user. If provided with an enabled API key for that user, returns also the private attaced files.
@@ -1310,6 +1367,20 @@ definitions:
               type: string
               description: Data issued
   
+  WizardShowResponse:
+    type: object
+    properties:
+      id:
+        type: string
+        description: wizard_id
+        
+  WizardErrorResponse:
+    type: object
+    properties:
+      error:
+        type: string
+        description: error text
+        
   FilestoreShowResponse:
     type: object
     properties:
