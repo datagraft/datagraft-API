@@ -152,151 +152,6 @@ paths:
         403:
           description: Forbidden  
     
-  /{user}/upwizards/new/{task}:
-    get:
-      description: Obtain a new wizard for uploading and transform data.
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user to own the wizard
-          in: path
-          type: string
-        - name: task
-          required: true
-          description: New wizard for creating a filestore or sparql_endpoint
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in creating a wizard
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        403:
-          description: Forbidden  
-        422:
-          description: Failed creating a wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/publish/{wiz_id}:
-    post:
-      description: Upload file
-      consumes:
-        - multipart/form-data  # and/or application/x-www-form-urlencoded
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-        - name: file
-          in: formData
-          description: The uploaded file data
-          required: true
-          type: file      
-      responses:
-        200:
-          description: Success uploading file
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        422:
-          description: Failed fetching file from wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/{wiz_id}/attachment:
-    get:
-      description: Download last file
-      produces: 
-        - text/csv
-        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-        - application/vnd.ms-excel
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in retrieving file
-        422:
-          description: Failed fetching file from wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/{wiz_id}:
-    get:
-      description: Show info about a wizard for uploading and transform data.
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user to own the wizard
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in reading a wizard
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        403:
-          description: Forbidden  
-        422:
-          description: Failed creating a wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-          
-  /{user}/upwizards/transform_direct/{wiz_id}:
-    put:
-      description: Execute a transformation
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-        - name: ids
-          required: true
-          description: Id for the transfomation and id for filestore to be used (id for filestore shall not omitted if file is uploaded to the wizard)
-          in: body
-          schema: 
-            $ref: '#/definitions/UpwizardTransformDirect'
-      responses:
-        200:
-          description: Success transforming file
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        422:
-          description: Failed transforming
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
   /{user}/filestores:
     get:
       description: Obtain a list of all public attached files for a user. If provided with an enabled API key for that user, returns also the private attaced files.
@@ -315,6 +170,29 @@ paths:
             $ref: '#/definitions/ThingIndexResponse'
         403:
           description: Forbidden  
+
+    post:
+      description: Creates a new attaced file for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: filestore
+          in: body
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        201:
+          description: Successfully created an attached file
+        403:
+          description: Forbidden
+          
     
   /{user}/filestores/{id}:
     get:
@@ -339,6 +217,107 @@ paths:
             $ref: '#/definitions/FilestoreShowResponse'
         403:
           description: Forbidden  
+    
+    put:
+      description: TO BE IMPLEMENTED - USE PATCH! Update an attaced file (replace the currently stored one with the one provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to change
+          required: true
+          type: string
+      
+        - name: filestore
+          in: body
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    patch:
+      description: Update an attaced file (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete an attaced file
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted attaced file
+
+  /{user}/filestores/{id}/publish:
+    post:
+      description: Upload a tabular file to the filestore.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the filestore belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the filestore
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
+        403:
+          description: Forbidden
     
   /{user}/filestores/{id}/metadata:
     get:
@@ -1263,14 +1242,14 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the list
+          description: ID of the user for whom to create a query
           in: path
           type: string
           
         - name: query
           in: body
           schema: 
-            $ref: '#/definitions/QueryPost'
+            $ref: '#/definitions/QueryPostFlat'
           required: true
       responses:
         201:
@@ -1383,7 +1362,7 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the sparql_endpoint
+          description: ID of the user for whom to execute the query
           in: path
           type: string
 
@@ -1835,6 +1814,28 @@ paths:
           schema:
             $ref: '#/definitions/ThingIndexResponse'
             
+    post:
+      description: Creates a new sparql_endpoint for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create the sparql_endpoint
+          in: path
+          type: string
+          
+        - name: sparql
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created sparql_endpoint
+        403:
+          description: Forbidden
+          
   /{user}/sparql_endpoints/{id}:
     get:
       description: Obtain the attributes of a sparql_endpoints
@@ -1858,6 +1859,79 @@ paths:
           schema:
             $ref: '#/definitions/SparqlendpointShowResponse'
 
+    put:
+      description: TO BE IMPLEMENTED - USE PATCH! Update a sparql_endpoint (replace the currently stored one with the one provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to change
+          required: true
+          type: string
+      
+        - name: sparql
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    patch:
+      description: Update a sparql_endpoint (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to change
+          required: true
+          type: string
+      
+        - in: body
+          name: sparql
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a sparql_endpoint
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted sparql_endpoint
+                    
+
   /{user}/sparql_endpoints/{id}/execute_query:
     post:
       description: Execute a SPARQL query search on a sparql_endpoint and a given query text.
@@ -1866,7 +1940,7 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the sparql_endpoint
+          description: User that the sparql_endpoint belongs to
           in: path
           type: string
         - name: id
@@ -1882,6 +1956,35 @@ paths:
       responses:
         200:
           description: Successfully search
+        403:
+          description: Forbidden
+    
+  /{user}/sparql_endpoints/{id}/publish:
+    post:
+      description: Upload a triple data file to the sparql_endpoint.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the sparql_endpoint belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the sparql_endpoint
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
         403:
           description: Forbidden
     
@@ -2473,6 +2576,19 @@ definitions:
       sin:extension:
         type: string
         
+  FilestorePost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
   TransformationShowResponse:
     type: object
     properties:
@@ -2539,6 +2655,25 @@ definitions:
       sparql_endpoint_ids:
         type: array
 
+  QueryPostFlat:
+    required:
+    - language
+    properties:
+      public:
+        type: boolean
+      name:
+        type: string
+      query_string:
+        type: string
+      language:
+        type: string
+      description:
+        type: string
+      sparql_endpoint_ids:
+        type: array
+
+
+
   QueryPost:
     required:
     - query
@@ -2554,7 +2689,7 @@ definitions:
             type: boolean
           name:
             type: string
-          query:
+          query_string:
             type: string
           language:
             type: string
@@ -2569,7 +2704,7 @@ definitions:
         type: boolean
       name:
         type: string
-      query:
+      query_string:
         type: string
       language:
         type: string
@@ -2622,17 +2757,25 @@ definitions:
       dcat:keyword:
         type: array
 
+  SparqlendpointPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
   SparqlendpointExecutequeryPost:
     required:
-    - execute_query
+    - query_string
     properties:
-      execute_query: 
-        type: object
-        required:
-        - query
-        properties:
-          query:
-            type: string
+      query_string:
+        type: string
 
   MetaData:
     type: object
