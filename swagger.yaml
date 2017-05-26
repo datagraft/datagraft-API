@@ -805,6 +805,76 @@ paths:
           schema:
             $ref: '#/definitions/TransformationShowResponse'
             
+  /{user}/transformations/{id}/execute/{type}:
+    post:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be transformed
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
+  /{user}/transformations/{id}/execute/{type}/{file_id}:
+    get:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - application/json
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: file_id
+          description: ID (slug) of the file to be transformed
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
   /{user}/transformations/{id}/metadata:
     get:
       description: Retrieve meta data for the chosen transformation
@@ -2620,6 +2690,13 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+
+  TransformationExecuteResponse:
+    type: object
+    properties:
+      dcat:accessURL:
+        type: string
+        description: URL used to fetch the transformed file
 
   QueryShowResponse:
     type: object
