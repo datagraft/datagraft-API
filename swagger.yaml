@@ -39,8 +39,8 @@ paths:
       consumes:
         - application/json
       parameters:
-        - in: body
-          name: api_key
+        - name: api_key
+          in: body
           schema: 
             $ref: '#/definitions/APIKeyPost'
           required: true
@@ -82,27 +82,6 @@ paths:
         403:
           description: Forbidden  
     patch:
-      description: Update an API key
-      produces: 
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - in: path
-          name: id
-          description: ID of the API key to be updated
-          required: true
-          type: string
-          
-        - in: body
-          name: api_key
-          schema: 
-            $ref: '#/definitions/APIKeyPatch'
-          required: true
-      responses:
-        200:
-          description: Successfully updated API key
-    put:
       description: Update an API key
       produces: 
         - application/json
@@ -218,32 +197,6 @@ paths:
         403:
           description: Forbidden  
     
-    put:
-      description: TO BE IMPLEMENTED - USE PATCH! Update an attaced file (replace the currently stored one with the one provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - in: path
-          name: user
-          description: User that the attaced file belongs to
-          required: true
-          type: string
-      
-        - in: path
-          name: id
-          description: ID (slug) of the attaced file to change
-          required: true
-          type: string
-      
-        - name: filestore
-          in: body
-          schema: 
-            $ref: '#/definitions/FilestorePost'
-          required: true
-      responses:
-        200:
-          description: OK
-          
     patch:
       description: Update an attaced file (only change the properties provided in the call)
       produces: 
@@ -342,7 +295,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create new meta data for the chosen attached file
+      description: Create a complete new meta data set for the chosen attached file
       produces:
         - application/json
       consumes:
@@ -364,7 +317,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put:
@@ -441,7 +394,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create a meta data field for the chosen attached file
+      description: Create a complete new meta data set for the chosen attached file
       produces:
         - application/json
         - text/plain
@@ -470,7 +423,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put: 
@@ -782,6 +735,29 @@ paths:
           schema:
             $ref: '#/definitions/ThingIndexResponse'
             
+    post:
+      description: Creates a new transformation for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: transformation
+          in: body
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a transformation
+        403:
+          description: Forbidden
+          
+    
   /{user}/transformations/{id}:
     get:
       description: Obtain the attributes of a transformation
@@ -804,6 +780,53 @@ paths:
           description: Successfully obtained transformation
           schema:
             $ref: '#/definitions/TransformationShowResponse'
+            
+    patch:
+      description: Update a transformation (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a transformation
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted transformation
+
             
   /{user}/transformations/{id}/execute/{type}:
     post:
@@ -841,7 +864,7 @@ paths:
             $ref: '#/definitions/TransformationExecuteResponse'
             
   /{user}/transformations/{id}/execute/{type}/{file_id}:
-    get:
+    post:
       description: Start a transformation using uploaded file
       consumes: 
         - application/json
@@ -896,7 +919,7 @@ paths:
           description: Successfully retrieved the meta data for the transformation
 
     post:
-      description: Create new meta data for the chosen transformation
+      description: Create a complete new meta data set for the chosen transformation
       produces:
         - application/json
       consumes:
@@ -918,7 +941,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put:
@@ -993,7 +1016,7 @@ paths:
           description: Successfully retrieved the meta data for the transformation
 
     post:
-      description: Create a meta data field for the chosen transformation
+      description: Create a complete new meta data set for the chosen transformation
       produces:
         - application/json
         - text/plain
@@ -1022,7 +1045,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put: 
@@ -1352,32 +1375,6 @@ paths:
         404:
           description: Not found
           
-    put:
-      description: TO BE IMPLEMENTED - USE PATCH! Update a query (replace the currently stored one with the one provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - in: path
-          name: user
-          description: User that the query belongs to
-          required: true
-          type: string
-      
-        - in: path
-          name: id
-          description: ID (slug) of the query to change
-          required: true
-          type: string
-      
-        - name: query
-          in: body
-          schema: 
-            $ref: '#/definitions/QueryPost'
-          required: true
-      responses:
-        200:
-          description: OK
-          
     patch:
       description: Update a query (only change the properties provided in the call)
       produces: 
@@ -1474,7 +1471,7 @@ paths:
           description: Successfully retrieved the meta data for the query
           
     post:
-      description: Create new meta data for the chosen query
+      description: Create a complete new meta data set for the chosen query
       produces:
         - application/json
       consumes:
@@ -1496,7 +1493,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put:
@@ -1571,7 +1568,7 @@ paths:
           description: Successfully retrieved the meta data for the query
           
     post:
-      description: Create a meta data field for the chosen query
+      description: Create a complete new meta data set for the chosen query
       produces:
         - application/json
         - text/plain
@@ -1600,7 +1597,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put: 
@@ -1929,32 +1926,6 @@ paths:
           schema:
             $ref: '#/definitions/SparqlendpointShowResponse'
 
-    put:
-      description: TO BE IMPLEMENTED - USE PATCH! Update a sparql_endpoint (replace the currently stored one with the one provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - in: path
-          name: user
-          description: User that the sparql_endpoint belongs to
-          required: true
-          type: string
-      
-        - in: path
-          name: id
-          description: ID (slug) of the sparql_endpoint to change
-          required: true
-          type: string
-      
-        - name: sparql
-          in: body
-          schema: 
-            $ref: '#/definitions/SparqlendpointPost'
-          required: true
-      responses:
-        200:
-          description: OK
-          
     patch:
       description: Update a sparql_endpoint (only change the properties provided in the call)
       produces: 
@@ -2079,7 +2050,7 @@ paths:
           description: Successfully retrieved the meta data for the sparql_endpoints
 
     post:
-      description: Create new meta data for the chosen sparql_endpoints
+      description: Create a complete new meta data set for the chosen sparql_endpoints
       produces:
         - application/json
       consumes:
@@ -2101,7 +2072,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put:
@@ -2176,7 +2147,7 @@ paths:
           description: Successfully retrieved the meta data for the sparql_endpoints
 
     post:
-      description: Create a meta data field for the chosen sparql_endpoints
+      description: Create a complete new meta data set for the chosen sparql_endpoints
       produces:
         - application/json
         - text/plain
@@ -2205,7 +2176,7 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
     put: 
@@ -2502,29 +2473,19 @@ definitions:
         
   APIKeyPost:
     required:
-    - api_key
+    - name
     properties:
-      api_key: 
-        type: object
-        required:
-        - enabled
-        properties:
-          name: 
-            type: string
-          enabled:
-            type: boolean
+      name: 
+        type: string
+      enabled:
+        type: boolean
             
   APIKeyPatch:
-    required:
-    - api_key
     properties:
-      api_key: 
-        type: object
-        properties:
-          name: 
-            type: string
-          enabled:
-            type: boolean
+      name: 
+        type: string
+      enabled:
+        type: boolean
             
   QuotasResponse:
     type: object
@@ -2659,6 +2620,20 @@ definitions:
       license:
         type: string
 
+
+  TransformationPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      code:
+        type: string
+
   TransformationShowResponse:
     type: object
     properties:
@@ -2791,16 +2766,9 @@ definitions:
         type: array
 
   QueryExecutePost:
-    required:
-    - execute_query
     properties:
-      execute_query: 
-        type: object
-        required:
-        - sparql_endpoints
-        properties:
-          sparql_endpoints:
-            type: integer
+      sparql_endpoint_id:
+        type: integer
 
   SparqlendpointShowResponse:
     type: object
