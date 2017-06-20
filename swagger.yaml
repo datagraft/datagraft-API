@@ -1106,7 +1106,7 @@ paths:
         - name: query
           in: body
           schema: 
-            $ref: '#/definitions/QueryPostFlat'
+            $ref: '#/definitions/QueryPost'
           required: true
       responses:
         201:
@@ -2083,27 +2083,6 @@ definitions:
               type: string
               description: Data issued
   
-  WizardShowResponse:
-    type: object
-    properties:
-      id:
-        type: string
-        description: wizard_id
-        
-  WizardErrorResponse:
-    type: object
-    properties:
-      error:
-        type: string
-        description: error text
-        
-  UpwizardTransformDirect:
-    properties:
-      filestore_id:
-        type: integer
-      transformation_id:
-        type: integer
-
   FilestoreShowResponse:
     type: object
     properties:
@@ -2235,7 +2214,7 @@ definitions:
       sparql_endpoint_ids:
         type: array
 
-  QueryPostFlat:
+  QueryPost:
     required:
     - language
     properties:
@@ -2251,32 +2230,6 @@ definitions:
         type: string
       sparql_endpoint_ids:
         type: array
-
-
-
-  QueryPost:
-    required:
-    - query
-    properties:
-      query: 
-        type: object
-        required:
-        - name
-        - type
-        - query
-        properties:
-          public:
-            type: boolean
-          name:
-            type: string
-          query_string:
-            type: string
-          language:
-            type: string
-          description:
-            type: string
-          sparql_endpoint_ids:
-            type: array
             
   QueryPatch:
     properties:
@@ -2295,7 +2248,7 @@ definitions:
 
   QueryExecutePost:
     properties:
-      sparql_endpoint_id:
+      sparql_endpoints:
         type: integer
 
   SparqlendpointShowResponse:
