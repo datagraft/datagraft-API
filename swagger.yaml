@@ -39,8 +39,8 @@ paths:
       consumes:
         - application/json
       parameters:
-        - in: body
-          name: api_key
+        - name: api_key
+          in: body
           schema: 
             $ref: '#/definitions/APIKeyPost'
           required: true
@@ -102,27 +102,6 @@ paths:
       responses:
         200:
           description: Successfully updated API key
-    put:
-      description: Update an API key
-      produces: 
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - in: path
-          name: id
-          description: ID of the API key to be updated
-          required: true
-          type: string
-          
-        - in: body
-          name: api_key
-          schema: 
-            $ref: '#/definitions/APIKeyPatch'
-          required: true
-      responses:
-        200:
-          description: Successfully updated API key
     delete:
       description: Delete an API key
       produces: 
@@ -152,151 +131,6 @@ paths:
         403:
           description: Forbidden  
     
-  /{user}/upwizards/new/{task}:
-    get:
-      description: Obtain a new wizard for uploading and transform data.
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user to own the wizard
-          in: path
-          type: string
-        - name: task
-          required: true
-          description: New wizard for creating a filestore or sparql_endpoint
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in creating a wizard
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        403:
-          description: Forbidden  
-        422:
-          description: Failed creating a wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/publish/{wiz_id}:
-    post:
-      description: Upload file
-      consumes:
-        - multipart/form-data  # and/or application/x-www-form-urlencoded
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-        - name: file
-          in: formData
-          description: The uploaded file data
-          required: true
-          type: file      
-      responses:
-        200:
-          description: Success uploading file
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        422:
-          description: Failed fetching file from wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/{wiz_id}/attachment:
-    get:
-      description: Download last file
-      produces: 
-        - text/csv
-        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-        - application/vnd.ms-excel
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in retrieving file
-        422:
-          description: Failed fetching file from wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
-  /{user}/upwizards/{wiz_id}:
-    get:
-      description: Show info about a wizard for uploading and transform data.
-      produces: 
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user to own the wizard
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-      responses:
-        200:
-          description: Success in reading a wizard
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        403:
-          description: Forbidden  
-        422:
-          description: Failed creating a wizard
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-          
-  /{user}/upwizards/transform_direct/{wiz_id}:
-    put:
-      description: Execute a transformation
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          required: true
-          description: ID of the user
-          in: path
-          type: string
-        - name: wiz_id
-          required: true
-          description: Id number for the wizard (returned when creating new wizard)
-          in: path
-          type: string
-        - name: ids
-          required: true
-          description: Id for the transfomation and id for filestore to be used (id for filestore shall not omitted if file is uploaded to the wizard)
-          in: body
-          schema: 
-            $ref: '#/definitions/UpwizardTransformDirect'
-      responses:
-        200:
-          description: Success transforming file
-          schema:
-            $ref: '#/definitions/WizardShowResponse'
-        422:
-          description: Failed transforming
-          schema:
-            $ref: '#/definitions/WizardErrorResponse'
-    
   /{user}/filestores:
     get:
       description: Obtain a list of all public attached files for a user. If provided with an enabled API key for that user, returns also the private attaced files.
@@ -315,6 +149,29 @@ paths:
             $ref: '#/definitions/ThingIndexResponse'
         403:
           description: Forbidden  
+
+    post:
+      description: Creates a new attaced file for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: filestore
+          in: body
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        201:
+          description: Successfully created an attached file
+        403:
+          description: Forbidden
+          
     
   /{user}/filestores/{id}:
     get:
@@ -340,9 +197,84 @@ paths:
         403:
           description: Forbidden  
     
+    patch:
+      description: Update an attaced file (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete an attaced file
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted attaced file
+
+  /{user}/filestores/{id}/publish:
+    post:
+      description: Upload a tabular file to the filestore.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the filestore belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the filestore
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
+        403:
+          description: Forbidden
+    
   /{user}/filestores/{id}/metadata:
     get:
-      description: Get list of all metadata for a specific attached file
+      description: Get list of all meta data for a specific attached file
       produces: 
         - application/json
       parameters:
@@ -363,7 +295,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create new meta data for the chosen attached file
+      description: Create a complete new meta data set for the chosen attached file
       produces:
         - application/json
       consumes:
@@ -385,34 +317,8 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
-          
-    put:
-      description: Create new meta data for the chosen atteced file
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the attaced file
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the attaced file for which to update the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data   
           
     delete:
       description: Delete all meta data for the chosen attaced file
@@ -435,7 +341,7 @@ paths:
   
   /{user}/filestores/{id}/metadata/{key}:
     get:
-      description: Get metadata entry for a specific attached file
+      description: Get meta data entry for a specific attached file
       produces: 
         - text/plain
         - application/json
@@ -452,7 +358,7 @@ paths:
           type: string
         - name: key
           required: true
-          description: ID of the metadata entry
+          description: ID of the meta data entry
           in: path
           type: string
       responses:
@@ -462,7 +368,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create a meta data field for the chosen attached file
+      description: Create a meta data entry for the chosen attached file
       produces:
         - application/json
         - text/plain
@@ -483,7 +389,7 @@ paths:
         - name: key
           in: path
           required: true
-          description: Key of the metadata to create
+          description: Key of the meta data to create
           type: string
         - name: metadata
           in: body
@@ -491,44 +397,11 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
-    put: 
-      description: Update a meta data field for the chosen attached file
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the attached file
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the attached file for which to update the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to update
-          required: true
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data field
-          
     delete:
-      description: Delete a metadata field for the chosen attached file
+      description: Delete a meta data entry for the chosen attached file
       produces:
         - application/json
       parameters:
@@ -544,12 +417,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to delete
+          description: The key of the meta data entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the meta data field
+          description: Successfully deleted the meta data entry
   
   /{user}/filestores/{id}/configuration:
     get:
@@ -574,7 +447,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create new configuration for the chosen attached file
+      description: Create a complete new configuration set for the chosen attached file
       produces:
         - application/json
       consumes:
@@ -596,34 +469,8 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
-          
-    put:
-      description: Update new configuration for the chosen attached file
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the attached file
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the attached file for which to update the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration   
           
     delete:
       description: Delete configuration for the chosen attached file
@@ -673,7 +520,7 @@ paths:
           description: Forbidden  
     
     post:
-      description: Create a configuration field for the chosen attached file
+      description: Create a configuration entry for the chosen attached file
       produces:
         - application/json
         - text/plain
@@ -702,44 +549,11 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
           
-    put: 
-      description: Update a configuration field for the chosen attached file
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the attached file
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the attached file for which to update the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to update
-          required: true
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration field
-          
     delete:
-      description: Delete a configuration field for the chosen attached file
+      description: Delete a configuration entry for the chosen attached file
       produces:
         - application/json
       parameters:
@@ -755,12 +569,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to delete
+          description: The key of the configuration entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the configuration field
+          description: Successfully deleted the configuration entry
 
   /{user}/filestores/{id}/attachment:
     get:
@@ -803,6 +617,29 @@ paths:
           schema:
             $ref: '#/definitions/ThingIndexResponse'
             
+    post:
+      description: Creates a new transformation for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: transformation
+          in: body
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a transformation
+        403:
+          description: Forbidden
+          
+    
   /{user}/transformations/{id}:
     get:
       description: Obtain the attributes of a transformation
@@ -826,6 +663,123 @@ paths:
           schema:
             $ref: '#/definitions/TransformationShowResponse'
             
+    patch:
+      description: Update a transformation (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a transformation
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted transformation
+
+            
+  /{user}/transformations/{id}/execute/{type}:
+    post:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be transformed
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
+  /{user}/transformations/{id}/execute/{type}/{file_id}:
+    post:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - application/json
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: file_id
+          description: ID (slug) of the file to be transformed
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
   /{user}/transformations/{id}/metadata:
     get:
       description: Retrieve meta data for the chosen transformation
@@ -847,7 +801,7 @@ paths:
           description: Successfully retrieved the meta data for the transformation
 
     post:
-      description: Create new meta data for the chosen transformation
+      description: Create a complete new meta data set for the chosen transformation
       produces:
         - application/json
       consumes:
@@ -869,34 +823,8 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
-          
-    put:
-      description: Create new meta data for the chosen transformation
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the transformation
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the transformation for which to update the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data   
           
     delete:
       description: Delete all meta data for the chosen transformation
@@ -936,7 +864,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to obtain
+          description: The key of the meta data entry to obtain
           required: true
           type: string
       responses:
@@ -944,7 +872,7 @@ paths:
           description: Successfully retrieved the meta data for the transformation
 
     post:
-      description: Create a meta data field for the chosen transformation
+      description: Create a meta data entry for the chosen transformation
       produces:
         - application/json
         - text/plain
@@ -965,7 +893,7 @@ paths:
         - name: key
           in: path
           required: true
-          description: Key of the metadata to create
+          description: Key of the meta data to create
           type: string
         - name: metadata
           in: body
@@ -973,44 +901,11 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
-    put: 
-      description: Update a meta data field for the chosen transformation
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the transformation
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the transformation for which to update the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to update
-          required: true
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data field
-          
     delete:
-      description: Delete a metadata field for the chosen transformation
+      description: Delete a meta data entry for the chosen transformation
       produces:
         - application/json
       parameters:
@@ -1026,12 +921,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to delete
+          description: The key of the meta data entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the meta data field
+          description: Successfully deleted the meta data entry
   
   /{user}/transformations/{id}/configuration:
     get:
@@ -1054,7 +949,7 @@ paths:
           description: Successfully retrieved the configuration for the transformation
   
     post:
-      description: Create new configuration for the chosen transformation
+      description: Create a complete new configuration set for the chosen transformation
       produces:
         - application/json
       consumes:
@@ -1076,34 +971,8 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
-          
-    put:
-      description: Update new configuration for the chosen transformation
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the transformation
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the transformation for which to update the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration   
           
     delete:
       description: Delete configuration for the chosen transformation
@@ -1143,7 +1012,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to obtain
+          description: The key of the configuration entry to obtain
           required: true
           type: string
       responses:
@@ -1151,7 +1020,7 @@ paths:
           description: Successfully retrieved the configuration for the transformation
 
     post:
-      description: Create a configuration field for the chosen transformation
+      description: Create a configuration entry for the chosen transformation
       produces:
         - application/json
         - text/plain
@@ -1180,44 +1049,11 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
           
-    put: 
-      description: Update a configuration field for the chosen transformation
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the transformation
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the transformation for which to update the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to update
-          required: true
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration field
-          
     delete:
-      description: Delete a configuration field for the chosen transformation
+      description: Delete a configuration entry for the chosen transformation
       produces:
         - application/json
       parameters:
@@ -1233,12 +1069,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to delete
+          description: The key of the configuration entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the configuration field
+          description: Successfully deleted the configuration entry
 
   /{user}/queries:
     get:
@@ -1263,7 +1099,7 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the list
+          description: ID of the user for whom to create a query
           in: path
           type: string
           
@@ -1302,32 +1138,6 @@ paths:
             $ref: '#/definitions/QueryShowResponse'
         404:
           description: Not found
-          
-    put:
-      description: TO BE IMPLEMENTED - USE PATCH! Update a query (replace the currently stored one with the one provided in the call)
-      produces: 
-        - application/json
-      parameters:
-        - in: path
-          name: user
-          description: User that the query belongs to
-          required: true
-          type: string
-      
-        - in: path
-          name: id
-          description: ID (slug) of the query to change
-          required: true
-          type: string
-      
-        - name: query
-          in: body
-          schema: 
-            $ref: '#/definitions/QueryPost'
-          required: true
-      responses:
-        200:
-          description: OK
           
     patch:
       description: Update a query (only change the properties provided in the call)
@@ -1383,7 +1193,7 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the sparql_endpoint
+          description: ID of the user for whom to execute the query
           in: path
           type: string
 
@@ -1425,7 +1235,7 @@ paths:
           description: Successfully retrieved the meta data for the query
           
     post:
-      description: Create new meta data for the chosen query
+      description: Create a complete new meta data set for the chosen query
       produces:
         - application/json
       consumes:
@@ -1447,34 +1257,8 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
-          
-    put:
-      description: Create new meta data for the chosen query
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the query
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the query for which to update the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data   
           
     delete:
       description: Delete all meta data for the chosen query
@@ -1514,7 +1298,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to obtain
+          description: The key of the meta data entry to obtain
           required: true
           type: string
       responses:
@@ -1522,7 +1306,7 @@ paths:
           description: Successfully retrieved the meta data for the query
           
     post:
-      description: Create a meta data field for the chosen query
+      description: Create a meta data entry for the chosen query
       produces:
         - application/json
         - text/plain
@@ -1543,7 +1327,7 @@ paths:
         - name: key
           in: path
           required: true
-          description: Key of the metadata to create
+          description: Key of the meta data to create
           type: string
         - name: metadata
           in: body
@@ -1551,44 +1335,11 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
-    put: 
-      description: Update a meta data field for the chosen query
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the query
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the query for which to update the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to update
-          required: true
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data field
-          
     delete:
-      description: Delete a metadata field for the chosen query
+      description: Delete a meta data entry for the chosen query
       produces:
         - application/json
       parameters:
@@ -1604,12 +1355,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to delete
+          description: The key of the meta data entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the meta data field
+          description: Successfully deleted the meta data entry
   
   /{user}/queries/{id}/configuration:
     get:
@@ -1632,7 +1383,7 @@ paths:
           description: Successfully retrieved the configuration for the query
           
     post:
-      description: Create new configuration for the chosen query
+      description: Create a complete new configuration set for the chosen query
       produces:
         - application/json
       consumes:
@@ -1654,34 +1405,8 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
-          
-    put:
-      description: Update new configuration for the chosen query
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the query
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the query for which to update the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration   
           
     delete:
       description: Delete configuration for the chosen query
@@ -1721,7 +1446,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to obtain
+          description: The key of the configuration entry to obtain
           required: true
           type: string
       responses:
@@ -1729,7 +1454,7 @@ paths:
           description: Successfully retrieved the configuration for the query
           
     post:
-      description: Create a configuration field for the chosen query
+      description: Create a configuration entry for the chosen query
       produces:
         - application/json
         - text/plain
@@ -1758,44 +1483,11 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
           
-    put: 
-      description: Update a configuration field for the chosen query
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the query
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the query for which to update the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to update
-          required: true
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration field
-          
     delete:
-      description: Delete a configuration field for the chosen query
+      description: Delete a configuration entry for the chosen query
       produces:
         - application/json
       parameters:
@@ -1811,12 +1503,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to delete
+          description: The key of the configuration entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the configuration field
+          description: Successfully deleted the configuration entry
 
   /{user}/sparql_endpoints:
     get:
@@ -1835,6 +1527,28 @@ paths:
           schema:
             $ref: '#/definitions/ThingIndexResponse'
             
+    post:
+      description: Creates a new sparql_endpoint for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create the sparql_endpoint
+          in: path
+          type: string
+          
+        - name: sparql
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created sparql_endpoint
+        403:
+          description: Forbidden
+          
   /{user}/sparql_endpoints/{id}:
     get:
       description: Obtain the attributes of a sparql_endpoints
@@ -1858,6 +1572,53 @@ paths:
           schema:
             $ref: '#/definitions/SparqlendpointShowResponse'
 
+    patch:
+      description: Update a sparql_endpoint (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to change
+          required: true
+          type: string
+      
+        - in: body
+          name: sparql
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a sparql_endpoint
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted sparql_endpoint
+                    
+
   /{user}/sparql_endpoints/{id}/execute_query:
     post:
       description: Execute a SPARQL query search on a sparql_endpoint and a given query text.
@@ -1866,7 +1627,7 @@ paths:
       parameters:
         - name: user
           required: true
-          description: ID of the user for whom to obtain the sparql_endpoint
+          description: User that the sparql_endpoint belongs to
           in: path
           type: string
         - name: id
@@ -1882,6 +1643,35 @@ paths:
       responses:
         200:
           description: Successfully search
+        403:
+          description: Forbidden
+    
+  /{user}/sparql_endpoints/{id}/publish:
+    post:
+      description: Upload a triple data file to the sparql_endpoint.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the sparql_endpoint belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the sparql_endpoint
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
         403:
           description: Forbidden
     
@@ -1906,7 +1696,7 @@ paths:
           description: Successfully retrieved the meta data for the sparql_endpoints
 
     post:
-      description: Create new meta data for the chosen sparql_endpoints
+      description: Create a complete new meta data set for the chosen sparql_endpoints
       produces:
         - application/json
       consumes:
@@ -1928,34 +1718,8 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
-          
-    put:
-      description: Create new meta data for the chosen sparql_endpoints
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the sparql_endpoints
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the sparql_endpoints for which to update the meta data
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data   
           
     delete:
       description: Delete all meta data for the chosen sparql_endpoints
@@ -1995,7 +1759,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to obtain
+          description: The key of the meta data entry to obtain
           required: true
           type: string
       responses:
@@ -2003,7 +1767,7 @@ paths:
           description: Successfully retrieved the meta data for the sparql_endpoints
 
     post:
-      description: Create a meta data field for the chosen sparql_endpoints
+      description: Create a meta data entry for the chosen sparql_endpoints
       produces:
         - application/json
         - text/plain
@@ -2024,7 +1788,7 @@ paths:
         - name: key
           in: path
           required: true
-          description: Key of the metadata to create
+          description: Key of the meta data to create
           type: string
         - name: metadata
           in: body
@@ -2032,44 +1796,11 @@ paths:
             $ref: '#/definitions/MetaData'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the meta data
           
-    put: 
-      description: Update a meta data field for the chosen sparql_endpoints
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the meta data for the sparql_endpoints
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the sparql_endpoints for which to update the meta data
-          type: string
-        - name: key
-          in: path
-          description: The key of the meta data field to update
-          required: true
-          type: string
-        - name: metadata
-          in: body
-          schema:
-            $ref: '#/definitions/MetaData'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the meta data field
-          
     delete:
-      description: Delete a metadata field for the chosen sparql_endpoints
+      description: Delete a meta data entry for the chosen sparql_endpoints
       produces:
         - application/json
       parameters:
@@ -2085,12 +1816,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the meta data field to delete
+          description: The key of the meta data entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the meta data field
+          description: Successfully deleted the meta data entry
   
   /{user}/sparql_endpoints/{id}/configuration:
     get:
@@ -2113,7 +1844,7 @@ paths:
           description: Successfully retrieved the configuration for the sparql_endpoints
   
     post:
-      description: Create new configuration for the chosen sparql_endpoints
+      description: Create a complete new configuration set for the chosen sparql_endpoints
       produces:
         - application/json
       consumes:
@@ -2135,34 +1866,8 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
-          
-    put:
-      description: Update new configuration for the chosen sparql_endpoints
-      produces:
-        - application/json
-      consumes:
-        - application/json
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the sparql_endpoints
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the sparql_endpoints for which to update the configuration
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration   
           
     delete:
       description: Delete configuration for the chosen sparql_endpoints
@@ -2202,7 +1907,7 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to obtain
+          description: The key of the configuration entry to obtain
           required: true
           type: string
       responses:
@@ -2210,7 +1915,7 @@ paths:
           description: Successfully retrieved the configuration for the sparql_endpoints
       
     post:
-      description: Create a configuration field for the chosen sparql_endpoints
+      description: Create a configuration entry for the chosen sparql_endpoints
       produces:
         - application/json
         - text/plain
@@ -2239,44 +1944,11 @@ paths:
             $ref: '#/definitions/Configuration'
           required: true
       responses:
-        200:
+        201:
           description: Successfully created the configuration
           
-    put: 
-      description: Update a configuration field for the chosen sparql_endpoints
-      produces:
-        - application/json
-        - text/plain
-      consumes:
-        - application/json
-        - text/plain
-      parameters:
-        - name: user
-          in: path
-          required: true
-          description: ID of the user for who to update the configuration for the sparql_endpoints
-          type: string
-        - name: id
-          in: path
-          required: true
-          description: ID (slug) of the sparql_endpoints for which to update the configuration
-          type: string
-        - name: key
-          in: path
-          description: The key of the configuration field to update
-          required: true
-          type: string
-        - name: configuration
-          in: body
-          schema:
-            $ref: '#/definitions/Configuration'
-          required: true
-      responses:
-        200:
-          description: Successfully updated the configuration field
-          
     delete:
-      description: Delete a configuration field for the chosen sparql_endpoints
+      description: Delete a configuration entry for the chosen sparql_endpoints
       produces:
         - application/json
       parameters:
@@ -2292,12 +1964,12 @@ paths:
           type: string
         - name: key
           in: path
-          description: The key of the configuration field to delete
+          description: The key of the configuration entry to delete
           required: true
           type: string
       responses:
         200:
-          description: Successfully deleted the configuration field
+          description: Successfully deleted the configuration entry
 
 definitions:
   APIKeyIndexResponse:
@@ -2329,29 +2001,19 @@ definitions:
         
   APIKeyPost:
     required:
-    - api_key
+    - name
     properties:
-      api_key: 
-        type: object
-        required:
-        - enabled
-        properties:
-          name: 
-            type: string
-          enabled:
-            type: boolean
+      name: 
+        type: string
+      enabled:
+        type: boolean
             
   APIKeyPatch:
-    required:
-    - api_key
     properties:
-      api_key: 
-        type: object
-        properties:
-          name: 
-            type: string
-          enabled:
-            type: boolean
+      name: 
+        type: string
+      enabled:
+        type: boolean
             
   QuotasResponse:
     type: object
@@ -2421,27 +2083,6 @@ definitions:
               type: string
               description: Data issued
   
-  WizardShowResponse:
-    type: object
-    properties:
-      id:
-        type: string
-        description: wizard_id
-        
-  WizardErrorResponse:
-    type: object
-    properties:
-      error:
-        type: string
-        description: error text
-        
-  UpwizardTransformDirect:
-    properties:
-      filestore_id:
-        type: integer
-      transformation_id:
-        type: integer
-
   FilestoreShowResponse:
     type: object
     properties:
@@ -2473,6 +2114,33 @@ definitions:
       sin:extension:
         type: string
         
+  FilestorePost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
+
+  TransformationPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      code:
+        type: string
+
   TransformationShowResponse:
     type: object
     properties:
@@ -2504,6 +2172,13 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+
+  TransformationExecuteResponse:
+    type: object
+    properties:
+      dcat:accessURL:
+        type: string
+        description: URL used to fetch the transformed file
 
   QueryShowResponse:
     type: object
@@ -2541,27 +2216,20 @@ definitions:
 
   QueryPost:
     required:
-    - query
+    - language
     properties:
-      query: 
-        type: object
-        required:
-        - name
-        - type
-        - query
-        properties:
-          public:
-            type: boolean
-          name:
-            type: string
-          query:
-            type: string
-          language:
-            type: string
-          description:
-            type: string
-          sparql_endpoint_ids:
-            type: array
+      public:
+        type: boolean
+      name:
+        type: string
+      query_string:
+        type: string
+      language:
+        type: string
+      description:
+        type: string
+      sparql_endpoint_ids:
+        type: array
             
   QueryPatch:
     properties:
@@ -2569,7 +2237,7 @@ definitions:
         type: boolean
       name:
         type: string
-      query:
+      query_string:
         type: string
       language:
         type: string
@@ -2579,16 +2247,9 @@ definitions:
         type: array
 
   QueryExecutePost:
-    required:
-    - execute_query
     properties:
-      execute_query: 
-        type: object
-        required:
-        - sparql_endpoints
-        properties:
-          sparql_endpoints:
-            type: integer
+      sparql_endpoints:
+        type: integer
 
   SparqlendpointShowResponse:
     type: object
@@ -2622,17 +2283,25 @@ definitions:
       dcat:keyword:
         type: array
 
+  SparqlendpointPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
   SparqlendpointExecutequeryPost:
     required:
-    - execute_query
+    - query_string
     properties:
-      execute_query: 
-        type: object
-        required:
-        - query
-        properties:
-          query:
-            type: string
+      query_string:
+        type: string
 
   MetaData:
     type: object
