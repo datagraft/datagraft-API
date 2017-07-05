@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   title: DataGraft 0.3.0
   description: |
-host: 127.0.0.1:3003
+host: datagraft.io
 schemes:
   - http
   - https
@@ -14,7 +14,7 @@ securityDefinitions:
     scopes:
       public: 'Grants read/write access to profile info only. Note that this scope includes user:email and user:follow.'
     flow: password
-    tokenUrl: 'http://127.0.0.1:3003/oauth/token'
+    tokenUrl: 'https://datagraft.io/oauth/token'
 security:
   - OAUTH2Security:
       - public
