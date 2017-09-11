@@ -1,0 +1,2357 @@
+---
+swagger: '2.0'
+info:
+  version: "1.0.0"
+  title: DataGraft 0.4.0
+  description: |
+host: 127.0.0.1:3003
+schemes:
+  - http
+  - https
+securityDefinitions:
+  OAUTH2Security:
+    type: oauth2
+    scopes:
+      public: 'Grants read/write access to profile info only. Note that this scope includes user:email and user:follow.'
+    flow: password
+    tokenUrl: 'http://127.0.0.1:3003/oauth/token'
+security:
+  - OAUTH2Security:
+      - public
+
+paths:
+  /api_keys:
+    get:
+      description: Get all API keys for the current user
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving API keys
+          schema:
+            $ref: '#/definitions/APIKeyIndexResponse'
+        403:
+          description: Forbidden  
+
+  /dbms/{dbm_id}/api_keys:
+    get:
+      description: Get all API keys for the current user for specific database
+      produces: 
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+          
+      responses:
+        200:
+          description: Success in retrieving API keys
+          schema:
+            $ref: '#/definitions/APIKeyIndexResponse'
+        403:
+          description: Forbidden  
+    post:
+      description: Create new API key for specific database
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - name: api_key
+          in: body
+          schema: 
+            $ref: '#/definitions/APIKeyPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created API key  
+          schema:
+            $ref: '#/definitions/APIKeyShowResponse'
+        403:
+          description: Forbidden  
+          
+  /dbms/{dbm_id}/api_keys/{id}:
+    get:
+      description: Get the attributes of a specific API key for the current user
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the API key to be retrieved
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully obtained info about API key
+          schema:
+            $ref: '#/definitions/APIKeyShowResponse'
+        403:
+          description: Forbidden  
+    patch:
+      description: Update an API key
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the API key to be updated
+          required: true
+          type: string
+          
+        - in: body
+          name: api_key
+          schema: 
+            $ref: '#/definitions/APIKeyPatch'
+          required: true
+      responses:
+        200:
+          description: Successfully updated API key
+    delete:
+      description: Delete an API key
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the API key to be deleted
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted API key
+          
+  /quotas:
+    get:
+      description: Get information on the current quota for the current user
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving quotainformation
+          schema:
+            $ref: '#/definitions/QuotasResponse'
+        403:
+          description: Forbidden  
+    
+  /{user}/filestores:
+    get:
+      description: Obtain a list of all public attached files for a user. If provided with an enabled API key for that user, returns also the private attaced files.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file list
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+        403:
+          description: Forbidden  
+
+    post:
+      description: Creates a new attaced file for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: filestore
+          in: body
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        201:
+          description: Successfully created an attached file
+        403:
+          description: Forbidden
+          
+    
+  /{user}/filestores/{id}:
+    get:
+      description: Get information about a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file information
+          schema:
+            $ref: '#/definitions/FilestoreShowResponse'
+        403:
+          description: Forbidden  
+    
+    patch:
+      description: Update an attaced file (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/FilestorePost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete an attaced file
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the attaced file belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the attaced file to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted attaced file
+
+  /{user}/filestores/{id}/publish:
+    post:
+      description: Upload a tabular file to the filestore.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the filestore belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the filestore
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
+        403:
+          description: Forbidden
+    
+  /{user}/filestores/{id}/metadata:
+    get:
+      description: Get list of all meta data for a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+    post:
+      description: Create a complete new meta data set for the chosen attached file
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attaced file for which to create the meta data
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete all meta data for the chosen attaced file
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the attaced file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attaced file for which to delete the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data for the query
+  
+  /{user}/filestores/{id}/metadata/{key}:
+    get:
+      description: Get meta data entry for a specific attached file
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+        - name: key
+          required: true
+          description: ID of the meta data entry
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+    post:
+      description: Create a meta data entry for the chosen attached file
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to create the meta data
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the meta data to create
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete a meta data entry for the chosen attached file
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to delete the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data entry
+  
+  /{user}/filestores/{id}/configuration:
+    get:
+      description: Get list of all configuration for a specific attached file
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+    post:
+      description: Create a complete new configuration set for the chosen attached file
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to create the configuration
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete configuration for the chosen attached file
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to delete the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration for the attached file
+  
+  /{user}/filestores/{id}/configuration/{key}:
+    get:
+      description: Get configuration entry for a specific attached file
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+        - name: key
+          required: true
+          description: ID of the configuration entry
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file information
+        403:
+          description: Forbidden  
+    
+    post:
+      description: Create a configuration entry for the chosen attached file
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to create the configuration
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the configuration to create
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete a configuration entry for the chosen attached file
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the attached file
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the attached file for which to delete the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration entry
+
+  /{user}/filestores/{id}/attachment:
+    get:
+      description: Download attached file
+      produces: 
+        - text/csv
+        - application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+        - application/vnd.ms-excel
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID of the file
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving file
+        403:
+          description: Forbidden  
+    
+  /{user}/transformations:
+    get:
+      description: Obtain a list of all public transformations for a user. If provided with an enabled API key for that user, returns also the private transformations.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved list of transformations
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+            
+    post:
+      description: Creates a new transformation for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create
+          in: path
+          type: string
+          
+        - name: transformation
+          in: body
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a transformation
+        403:
+          description: Forbidden
+          
+    
+  /{user}/transformations/{id}:
+    get:
+      description: Obtain the attributes of a transformation
+      produces: 
+        - application/json
+      parameters:
+      - in: path
+        name: user
+        description: User that the transformation belongs to
+        required: true
+        type: string
+      
+      - in: path
+        name: id
+        description: ID (slug) of the transformation to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successfully obtained transformation
+          schema:
+            $ref: '#/definitions/TransformationShowResponse'
+            
+    patch:
+      description: Update a transformation (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to change
+          required: true
+          type: string
+      
+        - in: body
+          name: filestore
+          schema: 
+            $ref: '#/definitions/TransformationPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a transformation
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the transformation belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the transformation to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted transformation
+
+            
+  /{user}/transformations/{id}/execute/{type}:
+    post:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be transformed
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
+  /{user}/transformations/{id}/execute/{type}/{file_id}:
+    post:
+      description: Start a transformation using uploaded file
+      consumes: 
+        - application/json
+      produces: 
+        - application/csv
+        - application/n-triples
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user owning the transformation
+          in: path
+          type: string
+        - name: id
+          description: ID (slug) of the transformation to execute
+          required: true
+          in: path
+          type: string
+        - name: type
+          description: Type of transformation to perform (pipe/graft)
+          required: true
+          in: path
+          type: string
+        - name: file_id
+          description: ID (slug) of the file to be transformed
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: Successfully executed transformation
+          schema:
+            $ref: '#/definitions/TransformationExecuteResponse'
+            
+  /{user}/transformations/{id}/metadata:
+    get:
+      description: Retrieve meta data for the chosen transformation
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to retrieve the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the transformation
+
+    post:
+      description: Create a complete new meta data set for the chosen transformation
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to create the meta data
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete all meta data for the chosen transformation
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to delete the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data for the transformation
+  
+  /{user}/transformations/{id}/metadata/{key}:
+    get:
+      description: Retrieve meta data according to the given key for the chosen transformation
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to retrieve the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the transformation
+
+    post:
+      description: Create a meta data entry for the chosen transformation
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to create the meta data
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the meta data to create
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete a meta data entry for the chosen transformation
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to delete the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data entry
+  
+  /{user}/transformations/{id}/configuration:
+    get:
+      description: Retrieve configuration for the chosen transformation
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to retrieve the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the transformation
+  
+    post:
+      description: Create a complete new configuration set for the chosen transformation
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to create the configuration
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete configuration for the chosen transformation
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to delete the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration for the transformation
+  
+  /{user}/transformations/{id}/configuration/{key}:
+    get:
+      description: Retrieve configuration according to the given key for the chosen transformation
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to retrieve the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the transformation
+
+    post:
+      description: Create a configuration entry for the chosen transformation
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to create the configuration
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the configuration to create
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete a configuration entry for the chosen transformation
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the transformation
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the transformation for which to delete the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration entry
+
+  /{user}/queries:
+    get:
+      description: Obtain a list of all public queries for a user. If provided with an enabled API key for that user, returns also the private queries.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved list of queries
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+    post:
+      description: Creates a new query for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create a query
+          in: path
+          type: string
+          
+        - name: query
+          in: body
+          schema: 
+            $ref: '#/definitions/QueryPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a query
+        403:
+          description: Forbidden
+          
+  /{user}/queries/{id}:
+    get:
+      description: Obtain the attributes of a query
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the query belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the query to retrieve
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully obtained query
+          schema:
+            $ref: '#/definitions/QueryShowResponse'
+        404:
+          description: Not found
+          
+    patch:
+      description: Update a query (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the query belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the query to change
+          required: true
+          type: string
+      
+        - in: body
+          name: query
+          schema: 
+            $ref: '#/definitions/QueryPatch'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a query
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the query belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the query to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted query
+                    
+  /{user}/queries/{id}/execute_query:
+    post:
+      description: Execute a sparql query search based on a Query and a sparql_endpoint.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to execute the query
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID (slug) of the query to delete
+          required: true
+          type: string
+
+        - name: execute_query
+          in: body
+          schema: 
+            $ref: '#/definitions/QueryExecutePost'
+          required: true
+      responses:
+        200:
+          description: Successfully search
+        403:
+          description: Forbidden
+    
+  /{user}/queries/{id}/metadata:
+    get:
+      description: Retrieve meta data for the chosen query
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to retrieve the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the query
+          
+    post:
+      description: Create a complete new meta data set for the chosen query
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to create the meta data
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete all meta data for the chosen query
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to delete the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data for the query
+  
+  /{user}/queries/{id}/metadata/{key}:
+    get:
+      description: Retrieve meta data according to the given key for the chosen query
+      produces: 
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to retrieve the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the query
+          
+    post:
+      description: Create a meta data entry for the chosen query
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to create the meta data
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the meta data to create
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete a meta data entry for the chosen query
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to delete the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data entry
+  
+  /{user}/queries/{id}/configuration:
+    get:
+      description: Retrieve configuration for the chosen query
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to retrieve the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the query
+          
+    post:
+      description: Create a complete new configuration set for the chosen query
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to create the configuration
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete configuration for the chosen query
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to delete the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration for the query
+  
+  /{user}/queries/{id}/configuration/{key}:
+    get:
+      description: Retrieve configuration according to the given key for the chosen query
+      produces: 
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to retrieve the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the query
+          
+    post:
+      description: Create a configuration entry for the chosen query
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to create the configuration
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the configuration to create
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete a configuration entry for the chosen query
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the query
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the query for which to delete the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration entry
+
+  /{user}/sparql_endpoints:
+    get:
+      description: Obtain a list of all public sparql_endpoints for a user. If provided with an enabled API key for that user, returns also the private sparql_endpoints.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved list of sparql_endpoints
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+            
+    post:
+      description: Creates a new sparql_endpoint for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create the sparql_endpoint
+          in: path
+          type: string
+          
+        - name: sparql
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created sparql_endpoint
+        403:
+          description: Forbidden
+          
+  /{user}/sparql_endpoints/{id}:
+    get:
+      description: Obtain the attributes of a sparql_endpoints
+      produces: 
+        - application/json
+      parameters:
+      - in: path
+        name: user
+        description: User that the sparql_endpoints belongs to
+        required: true
+        type: string
+      
+      - in: path
+        name: id
+        description: ID (slug) of the sparql_endpoints to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successfully obtained sparql_endpoints
+          schema:
+            $ref: '#/definitions/SparqlendpointShowResponse'
+
+    patch:
+      description: Update a sparql_endpoint (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to change
+          required: true
+          type: string
+      
+        - in: body
+          name: sparql
+          schema: 
+            $ref: '#/definitions/SparqlendpointPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a sparql_endpoint
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the sparql_endpoint belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the sparql_endpoint to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted sparql_endpoint
+                    
+
+  /{user}/sparql_endpoints/{id}/execute_query:
+    post:
+      description: Execute a SPARQL query search on a sparql_endpoint and a given query text.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the sparql_endpoint belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the sparql_endpoint
+          in: path
+          type: string
+        - name: execute_query
+          in: body
+          schema: 
+            $ref: '#/definitions/SparqlendpointExecutequeryPost'
+          required: true
+      responses:
+        200:
+          description: Successfully search
+        403:
+          description: Forbidden
+    
+  /{user}/sparql_endpoints/{id}/publish:
+    post:
+      description: Upload a triple data file to the sparql_endpoint.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the sparql_endpoint belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the sparql_endpoint
+          in: path
+          type: string
+        - name: publish_file
+          description: File to be uploaded
+          in: formData
+          type: file
+          required: true
+      responses:
+        200:
+          description: Successfully uploaded
+        403:
+          description: Forbidden
+    
+  /{user}/sparql_endpoints/{id}/metadata:
+    get:
+      description: Retrieve meta data for the chosen sparql_endpoints
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to retrieve the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the sparql_endpoints
+
+    post:
+      description: Create a complete new meta data set for the chosen sparql_endpoints
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to create the meta data
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete all meta data for the chosen sparql_endpoints
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to delete the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data for the sparql_endpoints
+  
+  /{user}/sparql_endpoints/{id}/metadata/{key}:
+    get:
+      description: Retrieve meta data according to the given key for the chosen sparql_endpoints
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to retrieve the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the sparql_endpoints
+
+    post:
+      description: Create a meta data entry for the chosen sparql_endpoints
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to create the meta data
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the meta data to create
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete a meta data entry for the chosen sparql_endpoints
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to delete the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data entry
+  
+  /{user}/sparql_endpoints/{id}/configuration:
+    get:
+      description: Retrieve configuration for the chosen sparql_endpoints
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to retrieve the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the sparql_endpoints
+  
+    post:
+      description: Create a complete new configuration set for the chosen sparql_endpoints
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to create the configuration
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete configuration for the chosen sparql_endpoints
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to delete the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration for the sparql_endpoints
+  
+  /{user}/sparql_endpoints/{id}/configuration/{key}:
+    get:
+      description: Retrieve configuration according to the given key for the chosen sparql_endpoints
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to retrieve the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the sparql_endpoints
+      
+    post:
+      description: Create a configuration entry for the chosen sparql_endpoints
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to create the configuration
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the configuration to create
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete a configuration entry for the chosen sparql_endpoints
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the sparql_endpoints
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the sparql_endpoints for which to delete the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration entry
+
+definitions:
+  APIKeyIndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        dbm_id: 
+          type: integer
+        user_id: 
+          type: integer
+        enabled: 
+          type: boolean
+        name: 
+          type: string
+        key_pub: 
+          type: string
+        key_secret: 
+          type: string
+          
+  APIKeyShowResponse:
+    type: object
+    properties:
+      enabled: 
+        type: boolean
+      name: 
+        type: string
+      key_pub: 
+        type: string
+      key_secret: 
+        type: string
+        
+  APIKeyPost:
+    required:
+    - name
+    properties:
+      name: 
+        type: string
+      key_pub: 
+        type: string
+      key_secret: 
+        type: string
+      enabled:
+        type: boolean
+            
+  APIKeyPatch:
+    properties:
+      name: 
+        type: string
+      key_pub: 
+        type: string
+      key_secret: 
+        type: string
+      enabled:
+        type: boolean
+            
+  QuotasResponse:
+    type: object
+    properties:
+      current_sparql_endpoints: 
+        type: integer
+      max_num_sparql_endpoints: 
+        type: integer
+      current_sparql_triples: 
+        type: integer
+      max_sparql_triples: 
+        type: integer
+      current_files: 
+        type: integer
+      max_num_files: 
+        type: integer
+      current_files_size: 
+        type: integer
+      max_files_size: 
+        type: integer
+      current_num_data_transformations: 
+        type: integer
+      max_num_data_transformations: 
+        type: integer
+        
+  ThingIndexResponse:
+    type: object
+    properties:
+      "@id": 
+        type: string
+        description: URL used to fetch this response
+      "@type": 
+        type: string
+        description: RDF object type
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      dcat:record:
+        type: array
+        items:
+          properties:
+            id:
+              type: string
+              description: Asset id
+            type:
+              type: string
+              description: Asset type
+            dct:title:
+              type: string
+              description: Asset title
+            foaf:primaryTopic:
+              type: string
+              description: URL for this asset
+            "@type": 
+              type: string
+              description: RDF object type
+            dcat:public:
+              type: boolean
+              description: Public / private visibility
+            foaf:publisher:
+              type: string
+              description: Asset username
+            dct:modified:
+              type: string
+              description: Date last modified
+            dct:issued:
+              type: string
+              description: Data issued
+  
+  FilestoreShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      dct:title:
+        type: string
+        description: Asset title
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:accessURL:
+        type: string
+        description: URL used to fetch the attached file
+      dcat:mediaType: 
+        type: string
+      dcat:byteSize: 
+        type: integer
+      sin:extension:
+        type: string
+        
+  FilestorePost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
+
+  TransformationPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      code:
+        type: string
+
+  TransformationShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      dct:title:
+        type: string
+        description: Asset title
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:public:
+        type: boolean
+        description: Public / private visibility
+      foaf:publisher:
+        type: string
+        description: Asset username
+      dct:description: 
+        type: string
+      dcat:keyword:
+        type: array
+
+  TransformationExecuteResponse:
+    type: object
+    properties:
+      dcat:accessURL:
+        type: string
+        description: URL used to fetch the transformed file
+
+  QueryShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      foaf:publisher:
+        type: string
+        description: Asset username
+      dcat:public:
+        type: boolean
+        description: Public / private visibility
+      dct:title:
+        type: string
+        description: Asset title
+      dct:description: 
+        type: string
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:keyword:
+        type: array
+      sparql_endpoint_ids:
+        type: array
+
+  QueryPost:
+    required:
+    - language
+    properties:
+      public:
+        type: boolean
+      name:
+        type: string
+      query_string:
+        type: string
+      language:
+        type: string
+      description:
+        type: string
+      sparql_endpoint_ids:
+        type: array
+            
+  QueryPatch:
+    properties:
+      public:
+        type: boolean
+      name:
+        type: string
+      query_string:
+        type: string
+      language:
+        type: string
+      description:
+        type: string
+      sparql_endpoint_ids:
+        type: array
+
+  QueryExecutePost:
+    properties:
+      sparql_endpoints:
+        type: integer
+
+  SparqlendpointShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      foaf:publisher:
+        type: string
+        description: Asset username
+      dcat:public:
+        type: boolean
+        description: Public / private visibility
+      dct:title:
+        type: string
+        description: Asset title
+      dct:description: 
+        type: string
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      dcat:keyword:
+        type: array
+
+  SparqlendpointPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+
+  SparqlendpointExecutequeryPost:
+    required:
+    - query_string
+    properties:
+      query_string:
+        type: string
+
+  MetaData:
+    type: object
+    
+  Configuration:
+    type: object
