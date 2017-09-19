@@ -33,6 +33,26 @@ paths:
         403:
           description: Forbidden  
 
+  /dbms/{dbm_id}/things:
+    get:
+      description: Get all assets for the current user connected to a specific database
+      produces: 
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the assets are connected to
+          in: path
+          type: string
+          
+      responses:
+        200:
+          description: Success in retrieving assets
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+        403:
+          description: Forbidden  
+
   /dbms/{dbm_id}/api_keys:
     get:
       description: Get all API keys for the current user for specific database
