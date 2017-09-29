@@ -2,7 +2,7 @@
 swagger: '2.0'
 info:
   version: "1.0.0"
-  title: DataGraft 0.3.0
+  title: DataGraft 0.4.0
   description: |
 host: datagraft.io
 schemes:
@@ -32,13 +32,59 @@ paths:
             $ref: '#/definitions/APIKeyIndexResponse'
         403:
           description: Forbidden  
+
+  /dbms/{dbm_id}/things:
+    get:
+      description: Get all assets for the current user connected to a specific database
+      produces: 
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the assets are connected to
+          in: path
+          type: string
+          
+      responses:
+        200:
+          description: Success in retrieving assets
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+        403:
+          description: Forbidden  
+
+  /dbms/{dbm_id}/api_keys:
+    get:
+      description: Get all API keys for the current user for specific database
+      produces: 
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+          
+      responses:
+        200:
+          description: Success in retrieving API keys
+          schema:
+            $ref: '#/definitions/APIKeyIndexResponse'
+        403:
+          description: Forbidden  
     post:
-      description: Create new API key
+      description: Create new API key for specific database
       produces: 
         - application/json
       consumes:
         - application/json
       parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
         - name: api_key
           in: body
           schema: 
@@ -51,17 +97,8 @@ paths:
             $ref: '#/definitions/APIKeyShowResponse'
         403:
           description: Forbidden  
-  /api_keys/first:
-    get:
-      description: Get the first enabled API key for the current user
-      produces: 
-        - text/plain
-      responses:
-        200:
-          description: Success in retrieving API key
-        403:
-          description: Forbidden  
-  /api_keys/{id}:
+          
+  /dbms/{dbm_id}/api_keys/{id}:
     get:
       description: Get the attributes of a specific API key for the current user
       produces: 
@@ -69,6 +106,12 @@ paths:
       consumes:
         - application/json
       parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
         - in: path
           name: id
           description: ID of the API key to be retrieved
@@ -88,6 +131,12 @@ paths:
       consumes:
         - application/json
       parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
         - in: path
           name: id
           description: ID of the API key to be updated
@@ -109,6 +158,12 @@ paths:
       consumes:
         - application/json
       parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
         - in: path
           name: id
           description: ID of the API key to be deleted
@@ -117,6 +172,111 @@ paths:
       responses:
         204:
           description: Successfully deleted API key
+
+  /dbms:
+    get:
+      description: Get all databases for the current user 
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving databases
+          schema:
+            $ref: '#/definitions/DbmIndexResponse'
+        403:
+          description: Forbidden  
+
+
+
+  /dbm_s4s:
+    get:
+      description: Get all S4 databases for the current user 
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving databases
+          schema:
+            $ref: '#/definitions/DbmS4IndexResponse'
+        403:
+          description: Forbidden  
+
+    post:
+      description: Creates a new S4 database for the current user
+      produces: 
+        - application/json
+      parameters:
+        - name: dbms4
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmS4Post'
+          required: true
+      responses:
+        201:
+          description: Successfully created a new uS4 database
+        403:
+          description: Forbidden
+          
+    
+  /dbm_s4s/{id}:
+    get:
+      description: Get information about a specific S4 database
+      produces: 
+        - application/json
+      parameters:
+        - name: id
+          required: true
+          description: ID of the database
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving information
+          schema:
+            $ref: '#/definitions/DbmS4ShowResponse'
+        403:
+          description: Forbidden  
+    
+    patch:
+      description: Update a specific S4 database
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the database
+          required: true
+          type: string
+
+        - name: dbms4
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmS4Patch'
+          required: true
+      
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a S4 database
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the database
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted database
+
+
+
+
+
+
           
   /quotas:
     get:
@@ -1978,15 +2138,17 @@ definitions:
       properties:
         id: 
           type: integer
+        dbm_id: 
+          type: integer
         user_id: 
           type: integer
         enabled: 
           type: boolean
         name: 
           type: string
-        key: 
+        key_pub: 
           type: string
-        url: 
+        key_secret: 
           type: string
           
   APIKeyShowResponse:
@@ -1996,7 +2158,9 @@ definitions:
         type: boolean
       name: 
         type: string
-      key: 
+      key_pub: 
+        type: string
+      key_secret: 
         type: string
         
   APIKeyPost:
@@ -2005,6 +2169,10 @@ definitions:
     properties:
       name: 
         type: string
+      key_pub: 
+        type: string
+      key_secret: 
+        type: string
       enabled:
         type: boolean
             
@@ -2012,9 +2180,92 @@ definitions:
     properties:
       name: 
         type: string
+      key_pub: 
+        type: string
+      key_secret: 
+        type: string
       enabled:
         type: boolean
             
+  DbmIndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        user_id: 
+          type: integer
+        name: 
+          type: string
+        supported_repo_types: 
+          type: array
+        url: 
+          type: string
+          
+  DbmS4IndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        user_id: 
+          type: integer
+        name: 
+          type: string
+        db_plan: 
+          type: string
+        supported_repo_types: 
+          type: array
+        supported_db_plans:
+          type: array
+        url: 
+          type: string
+        endpoint: 
+          type: string
+          
+  DbmS4Post:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      db_plan:
+        type: string
+      endpoint:
+        type: string
+      key:
+        type: string
+      secret:
+        type: string
+          
+  DbmS4Patch:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      db_plan:
+        type: string
+      endpoint:
+        type: string
+          
+  DbmS4ShowResponse:
+    type: object
+    properties:
+      id: 
+        type: integer
+      user_id: 
+        type: integer
+      name: 
+        type: string
+      supported_repo_types: 
+        type: array
+      url: 
+        type: string
+      endpoint: 
+        type: string
+        
+          
   QuotasResponse:
     type: object
     properties:
@@ -2280,6 +2531,10 @@ definitions:
       dct:issued:
         type: string
         description: Data issued
+      "@dbm_id":
+        type: integer
+      "@dbm_info":
+        type: string
       dcat:keyword:
         type: array
 
