@@ -213,7 +213,7 @@ paths:
           required: true
       responses:
         201:
-          description: Successfully created a new uS4 database
+          description: Successfully created a new S4 database
         403:
           description: Forbidden
           
@@ -272,10 +272,89 @@ paths:
         204:
           description: Successfully deleted database
 
+  /dbm_arangos:
+    get:
+      description: Get all Arango server connections for the current user 
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving servers
+          schema:
+            $ref: '#/definitions/DbmArangoIndexResponse'
+        403:
+          description: Forbidden  
 
+    post:
+      description: Creates a new Arango server connection for the current user
+      produces: 
+        - application/json
+      parameters:
+        - name: dbms4
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmArangoPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a new Arango server connection
+        403:
+          description: Forbidden
+          
+    
+  /dbm_arangos/{id}:
+    get:
+      description: Get information about a specific Arango connection
+      produces: 
+        - application/json
+      parameters:
+        - name: id
+          required: true
+          description: ID of the connection
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving information
+          schema:
+            $ref: '#/definitions/DbmArangoShowResponse'
+        403:
+          description: Forbidden  
+    
+    patch:
+      description: Update a specific Arango server connection
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the connection
+          required: true
+          type: string
 
-
-
+        - name: arango
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmArangoPatch'
+          required: true
+      
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete an Arango connection
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the connection
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted connection
 
           
   /quotas:
@@ -2199,8 +2278,8 @@ definitions:
           type: string
         supported_repo_types: 
           type: array
-        url: 
-          type: string
+          items:
+            type: object
           
   DbmS4IndexResponse:
     type: array
@@ -2216,8 +2295,12 @@ definitions:
           type: string
         supported_repo_types: 
           type: array
+          items:
+            type: object
         supported_db_plans:
           type: array
+          items:
+            type: object
         url: 
           type: string
         endpoint: 
@@ -2260,12 +2343,69 @@ definitions:
         type: string
       supported_repo_types: 
         type: array
+        items:
+          type: object
       url: 
         type: string
       endpoint: 
         type: string
         
           
+  DbmArangoIndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        user_id: 
+          type: integer
+        name: 
+          type: string
+        supported_repo_types: 
+          type: array
+          items:
+            type: object
+        uri: 
+          type: string
+          
+  DbmArangoPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      uri:
+        type: string
+      dbm_account_username:
+        type: string
+      dbm_account_password:
+        type: string
+          
+  DbmArangoPatch:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      uri:
+        type: string
+          
+  DbmArangoShowResponse:
+    type: object
+    properties:
+      id: 
+        type: integer
+      user_id: 
+        type: integer
+      name: 
+        type: string
+      supported_repo_types: 
+        type: array
+        items:
+          type: object
+      uri: 
+        type: string
+        
   QuotasResponse:
     type: object
     properties:
@@ -2423,6 +2563,8 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+        items:
+          type: object
 
   TransformationExecuteResponse:
     type: object
@@ -2462,8 +2604,12 @@ definitions:
         description: Data issued
       dcat:keyword:
         type: array
+        items:
+          type: object
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
 
   QueryPost:
     required:
@@ -2481,6 +2627,8 @@ definitions:
         type: string
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
             
   QueryPatch:
     properties:
@@ -2496,6 +2644,8 @@ definitions:
         type: string
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
 
   QueryExecutePost:
     properties:
@@ -2537,6 +2687,8 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+        items:
+          type: object
 
   SparqlendpointPost:
     required:
