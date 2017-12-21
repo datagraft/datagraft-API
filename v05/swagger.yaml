@@ -2,9 +2,9 @@
 swagger: '2.0'
 info:
   version: "1.0.0"
-  title: DataGraft 0.4.0
+  title: DataGraft 0.5.0
   description: |
-host: datagraft.io
+host: 127.0.0.1:3003
 schemes:
   - http
   - https
@@ -14,7 +14,7 @@ securityDefinitions:
     scopes:
       public: 'Grants read/write access to profile info only. Note that this scope includes user:email and user:follow.'
     flow: password
-    tokenUrl: 'https://datagraft.io/oauth/token'
+    tokenUrl: 'http://127.0.0.1:3003/oauth/token'
 security:
   - OAUTH2Security:
       - public
