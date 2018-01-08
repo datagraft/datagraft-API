@@ -2468,7 +2468,7 @@ paths:
     
   /{user}/arango_dbs/{id}/collection:
     post:
-      description: Create a new collection in the arango_db. For coll_type use 2 => Document collection, 3 => Edge collection
+      description: Create a new collection in the arango_db. For coll_type use document => Document collection, edge => Edge collection
       produces: 
         - application/json
       parameters:
@@ -3544,7 +3544,7 @@ definitions:
       coll_name:
         type: string
       coll_type:
-        type: integer
+        type: string
 
   MetaData:
     type: object
