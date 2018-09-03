@@ -2,7 +2,7 @@
 swagger: '2.0'
 info:
   version: "1.0.0"
-  title: DataGraft 0.4.0
+  title: DataGraft 0.5.0
   description: |
 host: datagraft.io
 schemes:
@@ -173,6 +173,126 @@ paths:
         204:
           description: Successfully deleted API key
 
+  /dbms/{dbm_id}/dbm_accounts:
+    get:
+      description: Get all DBM accounts for the current user for specific database
+      produces: 
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the accounts belongs to
+          in: path
+          type: string
+          
+      responses:
+        200:
+          description: Success in retrieving DBm accounts
+          schema:
+            $ref: '#/definitions/DBMAccountIndexResponse'
+        403:
+          description: Forbidden  
+    post:
+      description: Create new DBM account for specific database
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the account belongs to
+          in: path
+          type: string
+
+        - name: account
+          in: body
+          schema: 
+            $ref: '#/definitions/DBMAccountPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created DBM account 
+          schema:
+            $ref: '#/definitions/DBMAccountShowResponse'
+        403:
+          description: Forbidden  
+          
+  /dbms/{dbm_id}/dbm_accounts/{id}:
+    get:
+      description: Get the attributes of a specific DBM account for the current user
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the DBM account to be retrieved
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully obtained info about DBM account
+          schema:
+            $ref: '#/definitions/DBMAccountShowResponse'
+        403:
+          description: Forbidden  
+    patch:
+      description: Update a DBM account
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the DBM account to be updated
+          required: true
+          type: string
+          
+        - in: body
+          name: account
+          schema: 
+            $ref: '#/definitions/DBMAccountPatch'
+          required: true
+      responses:
+        200:
+          description: Successfully updated DBM account
+    delete:
+      description: Delete a DBM account
+      produces: 
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: dbm_id
+          required: true
+          description: ID of the database the key belongs to
+          in: path
+          type: string
+
+        - in: path
+          name: id
+          description: ID of the DBM account to be deleted
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted DBM Account
+
   /dbms:
     get:
       description: Get all databases for the current user 
@@ -213,7 +333,7 @@ paths:
           required: true
       responses:
         201:
-          description: Successfully created a new uS4 database
+          description: Successfully created a new S4 database
         403:
           description: Forbidden
           
@@ -272,10 +392,89 @@ paths:
         204:
           description: Successfully deleted database
 
+  /dbm_arangos:
+    get:
+      description: Get all Arango server connections for the current user 
+      produces: 
+        - application/json
+      responses:
+        200:
+          description: Success in retrieving servers
+          schema:
+            $ref: '#/definitions/DbmArangoIndexResponse'
+        403:
+          description: Forbidden  
 
+    post:
+      description: Creates a new Arango server connection for the current user
+      produces: 
+        - application/json
+      parameters:
+        - name: dbms4
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmArangoPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created a new Arango server connection
+        403:
+          description: Forbidden
+          
+    
+  /dbm_arangos/{id}:
+    get:
+      description: Get information about a specific Arango connection
+      produces: 
+        - application/json
+      parameters:
+        - name: id
+          required: true
+          description: ID of the connection
+          in: path
+          type: string
+      responses:
+        200:
+          description: Success in retrieving information
+          schema:
+            $ref: '#/definitions/DbmArangoShowResponse'
+        403:
+          description: Forbidden  
+    
+    patch:
+      description: Update a specific Arango server connection
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the connection
+          required: true
+          type: string
 
-
-
+        - name: arango
+          in: body
+          schema: 
+            $ref: '#/definitions/DbmArangoPatch'
+          required: true
+      
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete an Arango connection
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: ID of the connection
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted connection
 
           
   /quotas:
@@ -1347,7 +1546,7 @@ paths:
                     
   /{user}/queries/{id}/execute_query:
     post:
-      description: Execute a sparql query search based on a Query and a sparql_endpoint.
+      description: Execute a query search based on a Query and a sparql_endpoint or arango_db.
       produces: 
         - application/json
       parameters:
@@ -2131,6 +2330,551 @@ paths:
         200:
           description: Successfully deleted the configuration entry
 
+  /{user}/arango_dbs:
+    get:
+      description: Obtain a list of all public arango_dbs for a user. If provided with an enabled API key for that user, returns also the private arango_dbs.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to obtain the list
+          in: path
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved list of arango_dbs
+          schema:
+            $ref: '#/definitions/ThingIndexResponse'
+            
+    post:
+      description: Creates a new arango_db for the given user.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: ID of the user for whom to create the arnago_db
+          in: path
+          type: string
+          
+        - name: arango
+          in: body
+          schema: 
+            $ref: '#/definitions/ArangoDbPost'
+          required: true
+      responses:
+        201:
+          description: Successfully created arango_db
+        403:
+          description: Forbidden
+          
+  /{user}/arango_dbs/{id}:
+    get:
+      description: Obtain the attributes of an arango_dbs
+      produces: 
+        - application/json
+      parameters:
+      - in: path
+        name: user
+        description: User that the arango_dbs belongs to
+        required: true
+        type: string
+      
+      - in: path
+        name: id
+        description: ID (slug) of the arango_dbs to retrieve
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successfully obtained arango_dbs
+          schema:
+            $ref: '#/definitions/ArangoDbShowResponse'
+
+    patch:
+      description: Update a arango_db (only change the properties provided in the call)
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the arango_db belongs to
+          required: true
+          type: string
+      
+        - in: path
+          name: id
+          description: ID (slug) of the arango_db to change
+          required: true
+          type: string
+      
+        - in: body
+          name: arango
+          schema: 
+            $ref: '#/definitions/ArangoDbPost'
+          required: true
+      responses:
+        200:
+          description: OK
+          
+    delete:
+      description: Delete a arango_db
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the arango_db belongs to
+          required: true
+          type: string
+        
+        - in: path
+          name: id
+          description: ID (slug) of the arango_db to delete
+          required: true
+          type: string
+      responses:
+        204:
+          description: Successfully deleted arango_db
+                    
+
+  /{user}/arango_dbs/{id}/execute_query:
+    post:
+      description: Execute a AQL query search on a arango_db and a given query text.
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the arango_db belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the arango_db
+          in: path
+          type: string
+        - name: execute_query
+          in: body
+          schema: 
+            $ref: '#/definitions/ArangoDbExecutequeryPost'
+          required: true
+      responses:
+        200:
+          description: Successfully search
+        403:
+          description: Forbidden
+    
+  /{user}/arango_dbs/{id}/collection:
+    post:
+      description: Create a new collection in the arango_db. For coll_type use document => Document collection, edge => Edge collection
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the arango_db belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the arango_db
+          in: path
+          type: string
+        - name: coll
+          in: body
+          schema: 
+            $ref: '#/definitions/ArangoDbCollectionPost'
+          required: true
+      responses:
+        204:
+          description: Successfull creation
+        403:
+          description: Forbidden
+
+  /{user}/arango_dbs/{id}/collection/{coll_name}:
+    delete:
+      description: Delete a collection in arango_db
+      produces: 
+        - application/json
+      parameters:
+        - in: path
+          name: user
+          description: User that the arango_db belongs to
+          required: true
+          type: string
+        - in: path
+          name: id
+          description: ID (slug) of the arango_db
+          required: true
+          type: string
+        - in: path
+          name: coll_name
+          description: Name of the collection to delete
+          required: true
+          type: string
+
+      responses:
+        204:
+          description: Successfully deleted collection
+                    
+
+  /{user}/arango_dbs/{id}/collection/{coll_name}/collection_publish:
+    post:
+      description: Upload a JSON data file to the collection.
+      consumes: 
+        - multipart/form-data
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          required: true
+          description: User that the arango_db belongs to
+          in: path
+          type: string
+        - name: id
+          required: true
+          description: ID (slug) of the arango_db
+          in: path
+          type: string
+        - name: coll_name
+          required: true
+          description: name of the arango_db
+          in: path
+          type: string
+        - name: publish_file
+          required: true
+          description: File to be uploaded
+          type: file
+          in: formData
+        - name: json_option
+          description: auto => Autodetect, documents => JSON Document at each line, array => JSON array with all documents
+          required: true
+          type: string
+          in: formData
+        - name: from_to_coll_prefix
+          description: If edge collection, specify name of document collection to refer to
+          required: false
+          type: string
+          in: formData
+        - name: overwrite_option
+          description: true => Remove old data before import
+          required: false
+          type: string
+          in: formData
+        - name: on_duplicate_option
+          description: error => Do not import error, update => Update doc, replace => Replace doc, ignore => Do not import ignore
+          required: false
+          type: string
+          in: formData
+        - name: complete_option
+          description: true => Abort if errors
+          required: false
+          type: string
+          in: formData
+      responses:
+        200:
+          description: Successfully uploaded
+        403:
+          description: Forbidden
+    
+  /{user}/arango_dbs/{id}/metadata:
+    get:
+      description: Retrieve meta data for the chosen arango_db
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_dbs for which to retrieve the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the arango_db
+
+    post:
+      description: Create a complete new meta data set for the chosen arango_db
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to create the meta data
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete all meta data for the chosen arango_db
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to delete the meta data
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data for the arango_db
+  
+  /{user}/arango_dbs/{id}/metadata/{key}:
+    get:
+      description: Retrieve meta data according to the given key for the chosen arango_db
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to retrieve the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the meta data for the arango_db
+
+    post:
+      description: Create a meta data entry for the chosen arango_db
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to create the meta data
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the meta data to create
+          type: string
+        - name: metadata
+          in: body
+          schema:
+            $ref: '#/definitions/MetaData'
+          required: true
+      responses:
+        201:
+          description: Successfully created the meta data
+          
+    delete:
+      description: Delete a meta data entry for the chosen arango_db
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the meta data for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to delete the meta data
+          type: string
+        - name: key
+          in: path
+          description: The key of the meta data entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the meta data entry
+  
+  /{user}/arango_dbs/{id}/configuration:
+    get:
+      description: Retrieve configuration for the chosen arango_db
+      produces: 
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to retrieve the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the arango_db
+  
+    post:
+      description: Create a complete new configuration set for the chosen arango_db
+      produces:
+        - application/json
+      consumes:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to create the configuration
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete configuration for the chosen arango_db
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to delete the configuration
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration for the arango_db
+  
+  /{user}/arango_dbs/{id}/configuration/{key}:
+    get:
+      description: Retrieve configuration according to the given key for the chosen arango_db
+      produces: 
+        - text/plain
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to obtain the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to retrieve the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to obtain
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully retrieved the configuration for the arango_db
+      
+    post:
+      description: Create a configuration entry for the chosen arango_db
+      produces:
+        - application/json
+        - text/plain
+      consumes:
+        - application/json
+        - text/plain
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to create the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to create the configuration
+          type: string
+        - name: key
+          in: path
+          required: true
+          description: Key of the configuration to create
+          type: string
+        - name: configuration
+          in: body
+          schema:
+            $ref: '#/definitions/Configuration'
+          required: true
+      responses:
+        201:
+          description: Successfully created the configuration
+          
+    delete:
+      description: Delete a configuration entry for the chosen arango_db
+      produces:
+        - application/json
+      parameters:
+        - name: user
+          in: path
+          required: true
+          description: ID of the user for who to delete the configuration for the arango_db
+          type: string
+        - name: id
+          in: path
+          required: true
+          description: ID (slug) of the arango_db for which to delete the configuration
+          type: string
+        - name: key
+          in: path
+          description: The key of the configuration entry to delete
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successfully deleted the configuration entry
+
 definitions:
   APIKeyIndexResponse:
     type: array
@@ -2187,6 +2931,63 @@ definitions:
       enabled:
         type: boolean
             
+
+  DBMAccountIndexResponse:
+    type: array
+    items:
+      properties:
+        id: 
+          type: integer
+        dbm_id: 
+          type: integer
+        user_id: 
+          type: integer
+        name: 
+          type: string
+        enabled: 
+          type: boolean
+        public: 
+          type: boolean
+        url: 
+          type: string
+          
+  DBMAccountShowResponse:
+    type: object
+    properties:
+      name: 
+        type: string
+      enabled: 
+        type: boolean
+      public: 
+        type: boolean
+      url: 
+        type: string
+        
+  DBMAccountPost:
+    required:
+    - name
+    properties:
+      name: 
+        type: string
+      password: 
+        type: string
+      enabled:
+        type: boolean
+      public:
+        type: boolean
+            
+  DBMAccountPatch:
+    properties:
+      name: 
+        type: string
+      password: 
+        type: string
+      enabled:
+        type: boolean
+      public:
+        type: boolean
+            
+
   DbmIndexResponse:
     type: array
     items:
@@ -2199,8 +3000,8 @@ definitions:
           type: string
         supported_repo_types: 
           type: array
-        url: 
-          type: string
+          items:
+            type: object
           
   DbmS4IndexResponse:
     type: array
@@ -2216,8 +3017,12 @@ definitions:
           type: string
         supported_repo_types: 
           type: array
+          items:
+            type: object
         supported_db_plans:
           type: array
+          items:
+            type: object
         url: 
           type: string
         endpoint: 
@@ -2260,12 +3065,80 @@ definitions:
         type: string
       supported_repo_types: 
         type: array
+        items:
+          type: object
       url: 
         type: string
       endpoint: 
         type: string
         
           
+  DbmArangoIndexResponse:
+    type: object
+    properties:
+      dbm_arangos:
+        type: array
+        items:
+          properties:
+            id: 
+              type: integer
+            user_id: 
+              type: integer
+            name: 
+              type: string
+            supported_repo_types: 
+              type: array
+              items:
+                type: object
+            uri: 
+              type: string
+      db_entries:
+        type: array
+        items:
+          properties:
+            description: 
+              type: string
+            entry: 
+              type: string
+          
+  DbmArangoPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      uri:
+        type: string
+      dbm_account_username:
+        type: string
+      dbm_account_password:
+        type: string
+          
+  DbmArangoPatch:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      uri:
+        type: string
+          
+  DbmArangoShowResponse:
+    type: object
+    properties:
+      id: 
+        type: integer
+      user_id: 
+        type: integer
+      name: 
+        type: string
+      supported_repo_types: 
+        type: array
+        items:
+          type: object
+      uri: 
+        type: string
+        
   QuotasResponse:
     type: object
     properties:
@@ -2423,6 +3296,8 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+        items:
+          type: object
 
   TransformationExecuteResponse:
     type: object
@@ -2462,8 +3337,16 @@ definitions:
         description: Data issued
       dcat:keyword:
         type: array
+        items:
+          type: object
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
+      arango_db_ids:
+        type: array
+        items:
+          type: object
 
   QueryPost:
     required:
@@ -2481,6 +3364,12 @@ definitions:
         type: string
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
+      arango_db_ids:
+        type: array
+        items:
+          type: object
             
   QueryPatch:
     properties:
@@ -2496,10 +3385,18 @@ definitions:
         type: string
       sparql_endpoint_ids:
         type: array
+        items:
+          type: object
+      arango_db_ids:
+        type: array
+        items:
+          type: object
 
   QueryExecutePost:
     properties:
       sparql_endpoints:
+        type: integer
+      arango_dbs:
         type: integer
 
   SparqlendpointShowResponse:
@@ -2537,6 +3434,8 @@ definitions:
         type: string
       dcat:keyword:
         type: array
+        items:
+          type: object
 
   SparqlendpointPost:
     required:
@@ -2556,6 +3455,95 @@ definitions:
     - query_string
     properties:
       query_string:
+        type: string
+
+  ArangoDbShowResponse:
+    type: object
+    properties:
+      "@context": 
+        type: object
+        description: RDF prefix information and type definitions
+      "@id":
+        type: string
+        description: URL used to fetch this response
+      id:
+        type: string
+        description: Asset id
+      foaf:publisher:
+        type: string
+        description: Asset username
+      dcat:public:
+        type: boolean
+        description: Public / private visibility
+      dct:title:
+        type: string
+        description: Asset title
+      dct:description: 
+        type: string
+      dct:modified:
+        type: string
+        description: Date last modified
+      dct:issued:
+        type: string
+        description: Data issued
+      "@dbm_id":
+        type: integer
+      "@dbm_info":
+        type: string
+      "@db_name":
+        type: string
+      "@db_access":
+        type: string
+      "@db_edges":
+        type: string
+      "@db_docs":
+        type: string
+      dcat:keyword:
+        type: array
+        items:
+          type: object
+      "collections":
+        type: array
+        items:
+          properties:
+            '@coll_name':
+              type: string
+            '@coll_type':
+              type: string
+            '@coll_count':
+              type: string
+            '@coll_access':
+              type: string
+
+  ArangoDbPost:
+    required:
+    - name
+    properties:
+      name:
+        type: string
+      public:
+        type: boolean
+      description:
+        type: string
+      license:
+        type: string
+      db_entries:
+        type: string
+
+  ArangoDbExecutequeryPost:
+    required:
+    - query_string
+    properties:
+      query_string:
+        type: string
+
+  ArangoDbCollectionPost:
+    required:
+    - coll_name
+    properties:
+      coll_name:
+        type: string
+      coll_type:
         type: string
 
   MetaData:
